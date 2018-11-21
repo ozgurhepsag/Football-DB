@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  a(href='/about') Go to about page
+  ul
+      each val in players
+        li= val.firstName
