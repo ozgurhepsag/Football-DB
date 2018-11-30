@@ -2,17 +2,20 @@ extends ../layout
 
 block content
     .container
+        // Add country form
         .mb-5.mt-5
             h4 Add a new country
             form.form-inline
                 .form-group.mr-sm-2
-                    input#countryName.form-control(type='text' name='countryName' placeholder='Country name' required)
+                    input#countryName.form-control(type='text' name='countryName' placeholder='Country name')
                 .form-group.mr-sm-2
                     .custom-file
                         input#countryFlag.custom-file-input(type='file' name='countryFlag')
                         label.custom-file-label(for='countryFlag') Choose flag
                 .form-group.mr-sm-2     
                     button#btnAdd.btn.btn-success(type='button') Add
+        
+        // Display countries
         h3 Countries
         table#countryTable.table.table-hover
             thead.thead-dark
@@ -21,30 +24,63 @@ block content
                     th Name
                     th Flag
             tbody#countryTableBody
+    
+    // Modal - to delete and update
+    #countryModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='countryModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#countryModalLabel Country Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='countryIdModal') Country ID (disabled)
+                            input#countryIdModal.form-control(name='countryIdModal' type='text' disabled)
+                    form
+                        .form-group
+                            label(for='countryNameModal') Country name
+                            input#countryNameModal.form-control(name='countryNameModal' type='text')
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteCountry()') Delete
+                    button.btn.btn-success(type='button') Update
 
 
     script(type='text/javascript').
-        populateTable(); // initial fetch
-        
-        // Add country
-        $("#btnAdd").on('click', function(){
-            var country = {
-                name: $("#countryName").val(),
-                flag: null
-            }
-            $.ajax({
-                type: 'POST',
-                url: '/api/countries',
-                dataType: 'json',
-                data: country,
-                success: function(data){
-                    toastr.success('Country added successfully!')
-                    populateTable(); //refresh
-                },
-                error: function(data){
-                    toastr.error('Error while adding country...')
+        $(document).ready(function(){
+            populateTable(); // initial fetch
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            // Add country
+            $("#btnAdd").on('click', function(){
+                var country = {
+                    name: $("#countryName").val(),
+                    flag: null
                 }
-            });  
+                if (country.name.length < 1){
+                    toastr.error('Country name can\'t be empty.')
+                    return;
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/countries',
+                    dataType: 'json',
+                    data: country,
+                    success: function(data){
+                        toastr.success('Country added successfully!');
+                        populateTable(); //refresh
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding country...');
+                    }
+                });  
+            });
         });
 
         // Get countries from API
@@ -56,13 +92,51 @@ block content
                 success: function(data){
                     $("#countryTableBody").empty(); // clear table
                     var fetchedCountries = data.countries;
-                    console.log(fetchedCountries[i]);
                     for(var i=0; i<fetchedCountries.length; i++){
-                        $("#countryTableBody").append("<tr><td>"+ fetchedCountries[i].idCountry + "</td><td>" + fetchedCountries[i].name + "</td><td>" + fetchedCountries[i].flag + "</td></tr>");
+                        var row = "<tr class='rowCountry' id='"+ fetchedCountries[i].idCountry +"'><td>"+ fetchedCountries[i].idCountry + "</td><td>" + fetchedCountries[i].name + "</td><td>" + fetchedCountries[i].flag + "</td></tr>";
+                        $("#countryTableBody").append(row);
                     }
                 },
                 error: function(data){
                     toastr.error('Error while fetching countries...')
+                }
+            });
+        }
+
+        // Open modal if clicked on a row
+        function openModal(countryId){
+            var url = '/api/countries/' + countryId;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    var country = data.country;
+                    console.log(country);
+                    $("#countryModal").modal('show');
+                    $("#countryIdModal").val(country.idCountry);
+                    $("#countryNameModal").val(country.name);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching country...');
+                }
+            });
+        }
+
+        // Delete country 
+        function deleteCountry(){
+            var countryId = $("#countryIdModal").val();
+            var url = '/api/countries/' + countryId;
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function(data){
+                    toastr.error('Country deleted successfully!');
+                    populateTable();
+                    $("#countryModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting country!');
                 }
             });
         }
