@@ -2,13 +2,13 @@ extends layout
 
 block content
     .container
-        h1.text-center FBDB Login
         form.mt-5(action='/register' method='POST')
+            h2 FBDB Login
             .form-group
                 label(for='email') Email address
-                input#email.form-control(type='email' name='email' placeholder='Enter email')    
+                input#email.form-control(type='email' name='email' placeholder='Enter email' required)    
             .form-group
                 label(for='password') Password
-                input#password.form-control(type='password' name='password' placeholder='Enter password')
+                input#password.form-control(type='password' name='password' placeholder='Enter password' required)
             .text-center
                 button.btn.btn-primary(type='submit') Login

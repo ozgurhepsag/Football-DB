@@ -4,7 +4,16 @@ html
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     title= title
-    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
+
+    // Global css
+    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css') 
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css')
+
+    // Global js
+    script(src='/jquery/jquery.js')
+    script(src='/javascripts/bootstrap.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js')
+  
   body
     nav.navbar.navbar-expand-lg.navbar-light.bg-light
         a.navbar-brand(href='#') FBDB
@@ -12,10 +21,9 @@ html
             span.navbar-toggler-icon
         #navbarNavDropdown.collapse.navbar-collapse
           ul.navbar-nav
-            li.nav-item.active
+            li.nav-item
               a.nav-link(href='/')
                 | Home 
-                span.sr-only (current)
             li.nav-item
               a.nav-link(href='/register') Register
             li.nav-item
@@ -32,7 +40,10 @@ html
               .dropdown-menu(aria-labelledby='navbarDropdownMenuLink')
                 a.dropdown-item(href='#') England
                 a.dropdown-item(href='#') Turkey
-
+        .my-2.my-lg-0
+          ul.navbar-nav
+            li.nav-item.disabled 
+              a.nav-link.disabled(href="#") Admin:
+            li.nav-item
+              a.nav-link(href='/admin/country') Country
     block content
-    script(src='/jquery/jquery.js')
-    script(src='/javascripts/bootstrap.min.js')

@@ -1,0 +1,68 @@
+extends ../layout
+
+block content
+    .container
+        .mb-5.mt-5
+            h4 Add a new country
+            form.form-inline
+                .form-group.mr-sm-2
+                    input#countryName.form-control(type='text' name='countryName' placeholder='Country name' required)
+                .form-group.mr-sm-2
+                    .custom-file
+                        input#countryFlag.custom-file-input(type='file' name='countryFlag')
+                        label.custom-file-label(for='countryFlag') Choose flag
+                .form-group.mr-sm-2     
+                    button#btnAdd.btn.btn-success(type='button') Add
+        h3 Countries
+        table#countryTable.table.table-hover
+            thead.thead-dark
+                tr
+                    th ID
+                    th Name
+                    th Flag
+            tbody#countryTableBody
+
+
+    script(type='text/javascript').
+        populateTable(); // initial fetch
+        
+        // Add country
+        $("#btnAdd").on('click', function(){
+            var country = {
+                name: $("#countryName").val(),
+                flag: null
+            }
+            $.ajax({
+                type: 'POST',
+                url: '/api/countries',
+                dataType: 'json',
+                data: country,
+                success: function(data){
+                    toastr.success('Country added successfully!')
+                    populateTable(); //refresh
+                },
+                error: function(data){
+                    toastr.error('Error while adding country...')
+                }
+            });  
+        });
+
+        // Get countries from API
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/countries',
+                dataType: 'json',
+                success: function(data){
+                    $("#countryTableBody").empty(); // clear table
+                    var fetchedCountries = data.countries;
+                    console.log(fetchedCountries[i]);
+                    for(var i=0; i<fetchedCountries.length; i++){
+                        $("#countryTableBody").append("<tr><td>"+ fetchedCountries[i].idCountry + "</td><td>" + fetchedCountries[i].name + "</td><td>" + fetchedCountries[i].flag + "</td></tr>");
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...')
+                }
+            });
+        }

@@ -3,7 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var sess = require('express-session');
+var db = require('./lib/db')
+var passport = require('passport');
+var Strategy = require('passport-local').Strategy;
 
+var apiRouter = require('./routes/api');
+var adminRouter = require('./routes/admin');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var aboutRouter = require('./routes/about');
@@ -11,7 +17,8 @@ var aboutRouter = require('./routes/about');
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [path.join(__dirname, 'views'),
+                  path.join(__dirname, 'views/admin')]);
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
@@ -23,6 +30,8 @@ app.use(require('body-parser').urlencoded({ extended: true }));
 app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist/'));
 
 app.use('/', indexRouter);
+app.use('/api', apiRouter);
+app.use('/admin', adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
 
@@ -42,5 +51,21 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// session
+passport.use(new Strategy(
+  {
+    usernameField: 'email',
+    passwordField: 'password',
+    session: false
+  },
+  function(username, password, done) {
+    User.findOne({ username: username }, function (err, user) {
+      if (err) { return done(err); }
+      if (!user) { return done(null, false); }
+      if (!user.verifyPassword(password)) { return done(null, false); }
+      return done(null, user);
+    });
+  }
+));
 
 module.exports = app;
