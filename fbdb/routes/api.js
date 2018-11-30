@@ -52,7 +52,6 @@ router.get('/countries/:id', function(req, res, next){
 
 /* POST country */
 router.post('/countries', function(req, res, next){
-    console.log(req.body.name);
     var sql = "INSERT INTO fbdb.country (name) VALUES('" + req.body.name + "');"
     db.query(sql, function(err, result){
         if(err){
@@ -83,5 +82,26 @@ router.delete('/countries/:id', function(req, res, next){
     });    
 });
 
+/* UPDATE country */
+router.put('/countries/:id', function(req, res, next){
+    var country = {
+        idCountry: req.body.idCountry,
+        name: req.body.name,
+        flag: req.body.flag
+    }
+    var sql = "UPDATE fbdb.country SET name = '"+ country.name + "', flag = '" + country.flag + "' WHERE idCountry = '"+ country.idCountry +"';";
+    db.query(sql, function(err, result){
+        if(err){
+            res.status(404).json({
+                message: 'Failed to add country.',
+            });
+        } else{
+            res.status(201).json({
+                message: 'Country updated successfully!',
+                country: country
+            });
+        }
+    });    
+});
 
 module.exports = router;

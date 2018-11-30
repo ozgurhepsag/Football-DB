@@ -45,7 +45,7 @@ block content
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteCountry()') Delete
-                    button.btn.btn-success(type='button') Update
+                    button.btn.btn-success(type='button' onclick='updateCountry()') Update
 
 
     script(type='text/javascript').
@@ -131,7 +131,7 @@ block content
                 type: 'DELETE',
                 url: url,
                 success: function(data){
-                    toastr.error('Country deleted successfully!');
+                    toastr.success('Country deleted successfully!');
                     populateTable();
                     $("#countryModal").modal('hide');
                 },
@@ -139,4 +139,35 @@ block content
                     toastr.error('Error while deleting country!');
                 }
             });
+        }
+
+        // Update country
+        function updateCountry(){
+            var country = {
+                idCountry: $("#countryIdModal").val(),
+                name: $("#countryNameModal").val(),
+                flag: null
+            }
+
+            if (country.name == null || country.idCountry == null){
+                toastr.error('All fields must be filled!');
+                return;
+            }
+
+            var url = '/api/countries/' + country.idCountry;
+            $.ajax({
+                type: 'PUT',
+                dataType: 'json',
+                data: country,
+                url: url,
+                success: function(data){
+                    toastr.success('Country updated successfully!');
+                    populateTable();
+                    $("#countryModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating country!');
+                }
+            });
+
         }
