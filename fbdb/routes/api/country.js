@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../lib/db')
+var db = require('../../lib/db')
 
 /* GET all countries */
 router.get('/countries', function(req, res, next){
@@ -52,11 +52,12 @@ router.get('/countries/:id', function(req, res, next){
 
 /* POST country */
 router.post('/countries', function(req, res, next){
-    var sql = "INSERT INTO fbdb.country (name) VALUES('" + req.body.name + "');"
+    var sql = "INSERT INTO fbdb.country (name, flag) VALUES('" + req.body.name + "', '" + req.body.flag + "');"
     db.query(sql, function(err, result){
         if(err){
             res.status(404).json({
                 message: 'Failed to add country.',
+                error: err
             });
         } else{
             res.status(201).json({

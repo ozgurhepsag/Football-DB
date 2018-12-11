@@ -90,7 +90,7 @@ passport.use(
   })
 );
 
-var apiRouter = require('./routes/api');
+var apiCountryRouter = require('./routes/api/country');
 var adminRouter = require('./routes/admin');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -161,7 +161,7 @@ app.use(function(req, res, next) {
 
 /* ROUTES */
 app.use('/', indexRouter);
-app.use('/api', apiRouter);
+app.use('/api', apiCountryRouter);
 app.use('/admin', isAdmin, adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
