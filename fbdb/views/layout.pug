@@ -25,27 +25,35 @@ html
         ul.navbar-nav
           li.nav-item
             a.nav-link(href='/')
-              | Home 
-          li.nav-item
-            a.nav-link(href='/register') Register
-          li.nav-item
-            a.nav-link(href='/login') Login
+              | Home
           li.nav-item
             a.nav-link(href='/') Top Players
           li.nav-item
             a.nav-link(href='/') Top Teams
-          
-          
           li.nav-item.dropdown
-            a#navbarDropdownMenuLink.nav-link.dropdown-toggle(href='#' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+            a#countriesDropdown.nav-link.dropdown-toggle(href='#' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
               | Browse by Countries
-            .dropdown-menu(aria-labelledby='navbarDropdownMenuLink')
+            .dropdown-menu(aria-labelledby='countriesDropdown')
               a.dropdown-item(href='#') England
               a.dropdown-item(href='#') Turkey
+          if req.user && req.user.role == 1
+            li.nav-item.dropdown
+              a#adminDropdown.nav-link.dropdown-toggle(href='#' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+                | Admin Pages
+              .dropdown-menu(aria-labelledby='adminDropdown')
+                a.nav-link(href='/admin/country') Country
       .my-2.my-lg-0
         ul.navbar-nav
-          li.nav-item.disabled 
-            a.nav-link.disabled(href="#") Admin:
-          li.nav-item
-            a.nav-link(href='/admin/country') Country
+          if req.user
+            li.nav-item.disabled
+              a.nav-link.disabled() Welcome #{req.user.name}!
+            li.nav-item
+              a.btn.btn-sm.btn-danger.nav-link(href='/logout') Logout
+          else
+           li.nav-item
+            a.mr-1.btn.btn-sm.btn-warning.nav-link(href='/register') Register
+           li.nav-item
+            a.btn.btn-sm.btn-success.nav-link(href='/login') Login
+
+          
     block content
