@@ -2,8 +2,6 @@ extends layout
 
 block content
     .container.mt-5
-        if message
-            .alert.alert-danger #{message}
         form(action='/register' method='POST')
             h2 Register
             .form-group
@@ -21,3 +19,15 @@ block content
                 input#password2.form-control(type='password' name='password2' placeholder='Password' required)
             .text-center
                 button.btn.btn-primary(type='submit') Register
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            if ("#{message}" != null && "#{message}" != '') {
+                if ('#{error}' == 'false') {
+                    toastr.success("#{message}");
+                }
+                else { 
+                    toastr.error("#{message}");
+                }
+            }
+        });

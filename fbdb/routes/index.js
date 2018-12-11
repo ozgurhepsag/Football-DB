@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
           console.log("Pushed");
       }
       console.log("Players length:" + players.length);
-      res.render('index', { title: 'Test title', players: players });
+      res.render('index', { title: 'FBDB - Football Database', players: players });
   });
 
 });
@@ -43,21 +43,17 @@ router.post('/register', function(req, res, next) {
   }
 
   var sql = "SELECT * FROM fbdb.user WHERE email = '"+ email +"';";
-  console.log(sql);
   db.query(sql, function(err, result){
-      console.log("Looking if user with mail exists: " + email);
       if(err) throw err;
       if(result.length > 0){
           // email exists
           res.render('register', { title: 'FBDB - Register', error: true, message: 'Email is already registered!' });
       } else{
           // add to db
-          console.log("Adding user to DB..");
           var sql2 = "INSERT INTO fbdb.user (`email`, `name`, `password`, `role`) VALUES ('"+email+"', '"+name+"', '"+md5(password1)+"', '2');"
-          console.log(sql2);
           db.query(sql2, function(err, result){
               if(err) throw err;
-              res.render('register', { title: 'FBDB - Register' });
+              res.render('register', { title: 'FBDB - Register', error: false, message: 'Register completed.' });
           });
       }
   });
