@@ -92,6 +92,7 @@ passport.use(
 
 var apiCountryRouter = require('./routes/api/country');
 var apiLeagueRouter = require('./routes/api/league');
+var apiTeamRouter = require('./routes/api/team');
 var adminRouter = require('./routes/admin');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -164,6 +165,7 @@ app.use(function(req, res, next) {
 app.use('/', indexRouter);
 app.use('/api', apiCountryRouter);
 app.use('/api', apiLeagueRouter);
+app.use('/api', apiTeamRouter);
 app.use('/admin', adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);

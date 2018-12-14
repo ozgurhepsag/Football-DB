@@ -9,4 +9,8 @@ router.get('/league', function(req, res, next){
     res.render('admin_league', { title: 'FBDB - Manage Leagues' });
 })
 
+router.get('/team', function(req, res, next){
+    res.render('admin_team', { title: 'FBDB - Manage Teams' });
+})
+
 module.exports = router;
