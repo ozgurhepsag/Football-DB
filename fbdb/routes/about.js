@@ -5,7 +5,6 @@ var router = express.Router();
 router.get('/', function(req, res, next){
     res.render('about', {
         title: 'About',
-        players: [{name: "Player 1", number: 10}, {name: "Player 2", number: 7}],
     });
 });
 
