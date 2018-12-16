@@ -13,4 +13,8 @@ router.get('/team', function(req, res, next){
     res.render('admin_team', { title: 'FBDB - Manage Teams' });
 })
 
+router.get('/trophy', function(req, res, next){
+    res.render('admin_trophy', { title: 'FBDB - Manage Trophies' });
+})
+
 module.exports = router;
