@@ -1,0 +1,42 @@
+extends layout
+
+block content
+    .container
+        .mb-5.mt-5
+            h3 Leagues              
+                #area.card-columns
+            
+            
+                       
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateCards(); // initial fetch
+        });
+
+        // Get all records
+        function populateCards(){
+            $.ajax({
+                type: 'GET',
+                url: '/leagues/list',
+                dataType: 'json',
+                success: function(data){
+                    for(var i=0; i<data.length; i++){ // fill the cards and append
+                        
+                        var card = 
+                        "<div class='card' style='width: 18rem;'> <img class='card-img-top' src='" + data[i].c_flag + "' alt='Card image cap'> <div class='card-body'>" +
+                        "<h5 class='card-title'>" + data[i].l_name  + "</h5> <a href='#' class='btn btn-primary'> Standings and Teams </a> </div> </div>";
+                        d = document.createElement('div');
+                        d.id = data[i].l_id;
+                        
+                        document.getElementById('area').appendChild(d);
+                        document.getElementById(d.id).innerHTML = card; 
+                        
+                    }
+                    
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            });
+        };
+

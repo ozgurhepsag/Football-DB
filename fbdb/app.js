@@ -97,7 +97,8 @@ var adminRouter = require('./routes/admin');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var aboutRouter = require('./routes/about');
-var teamsRouter = require('./routes/teams')
+var teamsRouter = require('./routes/teams');
+var leaguesRouter = require('./routes/leagues');
 
 var app = express();
 
@@ -171,6 +172,7 @@ app.use('/admin', adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
 app.use('/teams', teamsRouter);
+app.use('/leagues', leaguesRouter);
 
 
 // GET login
