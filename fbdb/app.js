@@ -96,6 +96,12 @@ var apiLeagueRouter = require('./routes/api/league');
 var apiTeamRouter = require('./routes/api/team');
 var apiTrophyRouter = require('./routes/api/trophy');
 var apiMatchRouter = require('./routes/api/match');
+var apiManagerContractRouter = require('./routes/api/manager_contract');
+var apiManagerRouter = require('./routes/api/manager');
+var apiPlayerContractRouter = require('./routes/api/player_contract');
+var apiPlayerStatisticRouter = require('./routes/api/player_statistic');
+var apiPlayerTeamRouter = require('./routes/api/player_team');
+var apiPlayerRouter = require('./routes/api/player');
 
 // View routes
 var adminRouter = require('./routes/admin');
@@ -170,16 +176,24 @@ app.use(function(req, res, next) {
 
 /* ROUTES */
 app.use('/', indexRouter);
-app.use('/api', apiCountryRouter);
-app.use('/api', apiLeagueRouter);
-app.use('/api', apiTeamRouter);
-app.use('/api', apiTrophyRouter);
-app.use('/api', apiMatchRouter);
 app.use('/admin', adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
 app.use('/teams', teamsRouter);
 app.use('/leagues', leaguesRouter);
+
+// Api routes
+app.use('/api', apiCountryRouter);
+app.use('/api', apiLeagueRouter);
+app.use('/api', apiTeamRouter);
+app.use('/api', apiTrophyRouter);
+app.use('/api', apiMatchRouter);
+app.use('/api', apiManagerContractRouter);
+app.use('/api', apiManagerRouter);
+app.use('/api', apiPlayerContractRouter);
+app.use('/api', apiPlayerStatisticRouter);
+app.use('/api', apiPlayerTeamRouter);
+app.use('/api', apiPlayerRouter);
 
 
 // GET login

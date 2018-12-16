@@ -21,4 +21,28 @@ router.get('/match', function(req, res, next){
     res.render('admin_match', { title: 'FBDB - Manage Matches' });
 });
 
+router.get('/manager_contract', function(req, res, next){
+    res.render('admin_manager_contract', { title: 'FBDB - Manage Manager Contracts' });
+});
+
+router.get('/manager', function(req, res, next){
+    res.render('admin_manager', { title: 'FBDB - Manage Managers' });
+});
+
+router.get('/player_contract', function(req, res, next){
+    res.render('admin_player_contract', { title: 'FBDB - Manage Player Contracts' });
+});
+
+router.get('/player_statistics', function(req, res, next){
+    res.render('admin_player_statitstics', { title: 'FBDB - Manage Player Statistics' });
+});
+
+router.get('/player_team', function(req, res, next){
+    res.render('admin_player_team', { title: 'FBDB - Manage Player / Team' });
+});
+
+router.get('/player', function(req, res, next){
+    res.render('admin_player', { title: 'FBDB - Manage Players' });
+});
+
 module.exports = router;
