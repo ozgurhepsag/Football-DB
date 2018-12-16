@@ -55,10 +55,63 @@ block content
                     th League
             tbody#teamTableBody    
 
+    // Modal - to delete and update
+    #teamModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='teamModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#teamModalLabel Team Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='teamIdModal') Team ID (disabled)
+                            input#teamIdModal.form-control(name='teamIdModal' type='text' disabled)
+                    form
+                        .form-group
+                            label(for='teamNameModal') Team name
+                            input#teamNameModal.form-control(name='teamNameModal' type='text')
+                    form
+                        .form-group
+                            label(for='teamFoundationModal') Foundation year
+                            input#teamFoundationModal.form-control(name='teamFoundationModal' type='number')
+                    form
+                        .form-group
+                            label(for='teamStadiumModal') Stadium
+                            input#teamStadiumModal.form-control(name='teamStadiumModal' type='text')
+                    form
+                        .form-group
+                            .custom-file
+                                input#teamLogoModal.custom-file-input(type='file' name='teamLogoModal' accept='image/*')
+                                label.custom-file-label(for='teamLogoModal') Choose logo (empty to keep current)
+                            img#logoModal(height="32px;")
+                    form
+                        .form-group
+                            label(for='teamColor1Modal') Color 1
+                            input#teamColor1Modal.form-control(name='teamColor1Modal' type='color')
+                    form
+                        .form-group
+                            label(for='teamColor2Modal') Color 2
+                            input#teamColor2Modal.form-control(name='teamColor2Modal' type='color')
+                    form
+                        .form-group
+                            label(for='teamLeagueModal') League
+                            select#teamLeagueModal.form-control(name='teamLeagueModal')
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update
+
     script(type='text/javascript').
         $(document).ready(function(){
             populateSelect();
             populateTable();
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
 
             $("#btnAdd").on('click', function(){
                 if (!$("#addLogo")[0].files[0]) {
@@ -106,6 +159,108 @@ block content
             });
         });
         
+        // Fill data to modla
+        function openModal(id){
+            $("#teamLogoModal").val(''); // clear file input
+
+            var url = '/api/teams/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    $("#teamModal").modal('show');
+                    $("#teamIdModal").val(data.t_id);
+                    $("#teamNameModal").val(data.t_name);
+                    $("#teamFoundationModal").val(data.t_year);
+                    $("#teamStadiumModal").val(data.t_stadium);
+                    $("#teamColor1Modal").val(data.t_color1);
+                    $("#teamColor2Modal").val(data.t_color2);
+                    $("#teaLeagueModal").val(data.l_id);
+                    $("#logoModal").attr('src', data.t_logo);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching team...');
+                }
+            });
+        }
+
+        // Delete row
+        function deleteRow(){
+            var id = $("#teamIdModal").val();
+            var url = '/api/teams/' + id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(data){
+                    toastr.success('Team deleted successfully!');
+                    populateTable();
+                    $("#teamModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting team!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var newTeam = {
+                id: $("#teamIdModal").val(),
+                name: $("#teamNameModal").val(),
+                foundation: $("#teamFoundationModal").val(),
+                stadium: $("#teamStadiumModal").val(),
+                color1: $("#teamColor1Modal").val(),
+                color2: $("#teamColor2Modal").val(),
+                league: $("#teamLeagueModal").val()
+            }
+
+            if(!newTeam.id || !newTeam.name || !newTeam.foundation || !newTeam.stadium ||
+                !newTeam.color1 || !newTeam.color2 || !newTeam.league){
+                toastr.error('All required fields must be filled!');
+                return;
+            }
+            var url = '/api/teams/' + newTeam.id;
+
+            if($("#teamLogoModal")[0].files[0]) {
+                var reader = new FileReader();
+                reader.readAsDataURL($("#teamLogoModal")[0].files[0]);
+                reader.onload = function (readerEvt) {
+                    var binaryString = readerEvt.target.result;
+                    newTeam.logo = binaryString;
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: newTeam,
+                        success: function(data){
+                            toastr.success('Modal updated successfully!');
+                            populateTable();
+                            $("#teamModal").modal('hide');
+                        },
+                        error: function(data){
+                            toastr.error('Error while updating team!');
+                        }
+                    });
+                }
+            } else {
+                newTeam.logo = $("#logoModal").attr("src");
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: newTeam,
+                    success: function(data){
+                        toastr.success('Modal updated successfully!');
+                        populateTable();
+                        $("#teamModal").modal('hide');
+                    },
+                    error: function(data){
+                        toastr.error('Error while updating team!');
+                    }
+                });
+            }
+
+        }
+
         // Add leauges to select inputs
         function populateSelect(){
             $.ajax({
@@ -119,7 +274,7 @@ block content
                         $(option1).html(data[i].l_name);
                         $(option2).html(data[i].l_name);
                         $("#addLeague").append(option1);
-                        //$("#leagueSelectCountryModal").append(option2);
+                        $("#teamLeagueModal").append(option2);
                     }
                 },
                 error: function(data){
@@ -139,20 +294,22 @@ block content
                     for(var i=0; i<data.length; i++){
                         // get league info
                         var url = '/api/leagues/' + data[i].l_id;
+                        var teamData = data[i];
                         $.ajax({
                             type: 'GET', 
                             url: url,
-                            success: function(league) {
+                            async: false,
+                            success: function(leagueData) {
                                 var row = `
-                                    <tr class='rowLeague' id='${data.t_id}'>
-                                        <td>${data[i].t_id}</td>
-                                        <td>${data[i].t_name}</td>
-                                        <td>${data[i].t_year}</td>
-                                        <td>${data[i].t_stadium}</td>
-                                        <td><img height='48' src='${data[i].t_logo}'></td>
-                                        <td bgcolor='${data[i].t_color1}'></td>
-                                        <<td bgcolor='${data[i].t_color2}'></td>
-                                        <td>${league.l_name}</td>
+                                    <tr class='rowLeague' id='${teamData.t_id}'>
+                                        <td>${teamData.t_id}</td>
+                                        <td>${teamData.t_name}</td>
+                                        <td>${teamData.t_year}</td>
+                                        <td>${teamData.t_stadium}</td>
+                                        <td><img height='48' src='${teamData.t_logo}'></td>
+                                        <td bgcolor='${teamData.t_color1}'></td>
+                                        <<td bgcolor='${teamData.t_color2}'></td>
+                                        <td>${leagueData.l_name}</td>
                                     </tr>"
                                 `;
                                 $("#teamTableBody").append(row);

@@ -84,8 +84,7 @@ router.put('/leagues/:id', function(req, res, next){
         WHERE idLeague = ?;
     `;
     db.query(sql, [req.body.l_name, req.body.c_id, req.body.l_id], function(error, result){
-        if(error){
-            
+        if(error){    
             res.status(404).json({
                 error: 'Failed to add league.'
             });
