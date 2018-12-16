@@ -63,4 +63,46 @@ router.post('/teams', function(req, res, next){
     })
 })
 
+/* DELETE team */
+router.delete('/teams/:id', function(req, res, next){
+    var sql = `
+        DELETE FROM fbdb.team
+        WHERE idTeam = ?;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if(error){
+            res.status(404).json({
+                error: 'Failed to delete team.',
+            });
+        }
+        
+        res.status(201).json({
+            success: 'Team deleted successfully!'
+        });
+    });
+});
+
+/* UPDATE team */
+router.put('/teams/:id', function(req, res, next){
+    var sql = `
+        UPDATE fbdb.team
+        SET name = ?, foundationYear = ?, stadium = ?, logo = ?,
+            color1 = ?, color2 = ?, league = ?
+        WHERE idTeam = ?;
+    `;
+
+    db.query(sql, [req.body.name, req.body.foundation, req.body.stadium, req.body.logo, req.body.color1, req.body.color2, req.body.league, req.body.id], function(error, result){
+        if(error){    
+            console.log(error);
+            res.status(404).json({
+                error: 'Failed to update team.'
+            });
+        } 
+        res.status(201).json({
+            success: 'Team updated successfully!'
+        });  
+    });
+})
+
 module.exports = router;

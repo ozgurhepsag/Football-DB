@@ -1,0 +1,260 @@
+extends ../layout
+
+block content
+    .container
+        // Add form
+        .mb-5.mt-5
+            h4 Add a new trophy
+            form#addForm.form-inline
+                .form-group.mr-sm-2
+                    input#tSeason.form-control(type='number' name='tSeason' placeholder='Trophy year')
+                .form-group.mr-sm-2
+                    select#tTeam.form-control
+                .form-group.mr-sm-2
+                    select#tLeague.form-control
+                .form-group.mr-sm-2     
+                    button#btnAdd.btn.btn-success(type='button') Add
+        
+        // Display rows
+        h3 Trophies
+        table#trophyTable.table.table-hover
+            caption Click on trophies to update/delete
+            thead.thead-dark
+                tr
+                    th ID
+                    th Season
+                    th Team
+                    th League
+            tbody#trophyTableBody
+    
+    // Modal - to delete and update
+    #trophyModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='trophyModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#trophyModalLabel Trophy Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='tIdModal') Trophy ID (disabled)
+                            input#tIdModal.form-control(name='tIdModal' type='text' disabled)
+                        .form-group
+                            label(for='tSeasonModal') Season
+                            input#tSeasonModal.form-control(name='tSeasonModal' type='number')
+                        .form-group
+                            label(for='tTeamModal') Team
+                            select#tTeamModal.form-control
+                        .form-group
+                            label(for='tLeagueModal') League
+                            select#tLeagueModal.form-control
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update
+
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateTable(); // initial fetch
+            populateSelect(); // fill select 
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            // Add league
+            $("#btnAdd").on('click', function(){
+                var newTrophy = {
+                    season: $("#tSeason").val(),
+                    team: $("#tTeam").val(),
+                    league: $("#tLeague").val()
+                }
+
+                if (!newTrophy.season || !newTrophy.team || !newTrophy.league) {
+                    toastr.error('All required fields must be filled.')
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/trophies',
+                    data: newTrophy,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('Trophy added successfully!');
+                        populateTable(); //refresh
+                        document.getElementById("addForm").reset(); //reset
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding trophy...');
+                    }
+                });   
+            });
+        });
+
+        // Get all records
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/trophies',
+                dataType: 'json',
+                success: function(data){
+                    $("#trophyTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var trophyData = {
+                            id: data[i].id,
+                            season: data[i].season
+                        }
+
+                        var teamUrl = '/api/teams/' + data[i].t_id;
+                        $.ajax({
+                            type: 'GET',
+                            url: teamUrl,
+                            async: false,
+                            success: function(teamData){
+                                trophyData.team = teamData.t_name;
+                            }
+                        });
+
+                        var leagueUrl = '/api/leagues/' + data[i].l_id;
+                        $.ajax({
+                            type: 'GET',
+                            url: leagueUrl,
+                            async: false,
+                            success: function(leagueData){
+                                trophyData.league = leagueData.l_name;
+                            }
+                        });
+
+                        var row = `
+                            <tr class='trophyRow' id='${trophyData.id}'>
+                                <td>${trophyData.id}</td>
+                                <td>${trophyData.season}</td>
+                                <td>${trophyData.team}</td>
+                                <td>${trophyData.league}</td>
+                            </tr>
+                        `;
+                        $("#trophyTableBody").append(row);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching trophies...')
+                }
+            });
+        }
+
+        // Get select options (FK)
+        function populateSelect(){
+            // Get teams
+            $.ajax({
+                type: 'GET',
+                url: '/api/teams',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].t_name, data[i].t_id);
+                        var option2 = new Option(data[i].t_name, data[i].t_id);
+                        $(option1).html(data[i].t_name);
+                        $(option2).html(data[i].t_name);
+                        $("#tTeam").append(option1);
+                        $("#tTeamModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            });
+
+            // Get leagues
+            $.ajax({
+                type: 'GET',
+                url: '/api/leagues',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].l_name, data[i].l_id);
+                        var option2 = new Option(data[i].l_name, data[i].l_id);
+                        $(option1).html(data[i].l_name);
+                        $(option2).html(data[i].l_name);
+                        $("#tLeague").append(option1);
+                        $("#tLeagueModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            });
+        }
+
+        // Open modal if clicked on a row
+        function openModal(id){
+            var url = '/api/trophies/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    $("#trophyModal").modal('show');
+                    $("#tIdModal").val(data.id);
+                    $("#tSeasonModal").val(data.season);
+                    $("#tTeamModal").val(data.t_id);
+                    $("#tLeagueModal").val(data.l_id);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching trophy...');
+                }
+            });
+        }
+
+        // Delete row 
+        function deleteRow(){
+            var id = $("#tIdModal").val();
+            var url = '/api/trophies/' + id;
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function(data){
+                    toastr.success('Trophy deleted successfully!');
+                    populateTable();
+                    $("#trophyModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting trophy!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var trophy = {
+                id: $("#tIdModal").val(),
+                season: $("#tSeasonModal").val(),
+                team: $("#tTeamModal").val(),
+                league: $("#tLeagueModal").val()
+            }
+
+            if (!trophy.id || !trophy.season || !trophy.team || !trophy.league){
+                toastr.error('All fields must be filled!');
+                return;
+            }
+
+            var url = '/api/trophies/' + trophy.id;
+            $.ajax({
+                type: 'PUT',
+                dataType: 'json',
+                data: trophy,
+                url: url,
+                success: function(data){
+                    toastr.success('Trophy updated successfully!');
+                    populateTable();
+                    $("#trophyModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating trophy!');
+                }
+            });
+        }
+        
