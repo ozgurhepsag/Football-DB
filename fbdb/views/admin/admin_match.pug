@@ -1,0 +1,329 @@
+extends ../layout
+
+block content
+    .container
+        // Add form
+        .mb-5.mt-5
+            h4 Add a new match
+            form#addForm.form-inline
+                .form-group.mr-sm-2
+                    input#mSeason.form-control(type='number' name='mSeason' placeholder='Match season')
+                .form-group.mr-sm-2
+                    select#mTeam1.form-control
+                .form-group.mr-sm-2
+                    input#mTeam1Score.form-control(type='number' name='mTeam1Score' placeholder='Home score')
+                .form-group.mr-sm-2
+                    select#mTeam2.form-control
+                .form-group.mr-sm-2
+                    input#mTeam2Score.form-control(type='number' name='mTeam2Score' placeholder='Away score')
+                .form-group.mr-sm-2
+                    input#mRound.form-control(type='number' name='mRound' placeholder='Week / Round')
+                .form-group.mr-sm-2
+                    select#mLeague.form-control
+                .form-group.mr-sm-2     
+                    button#btnAdd.btn.btn-success(type='button') Add
+        
+        // Display rows
+        h3 Matches
+        table#matchTable.table.table-hover
+            caption Click on matches to update/delete
+            thead.thead-dark
+                tr
+                    th ID
+                    th Season
+                    th Home team
+                    th Home score
+                    th Away team
+                    th Away score
+                    th Round/Week
+                    th League
+            tbody#matchTableBody
+    
+    // Modal - to delete and update
+    #matchModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='matchModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#matchModalLabel Match Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='mIdModal') Match ID (disabled)
+                            input#mIdModal.form-control(name='mIdModal' type='text' disabled)
+                        .form-group
+                            label(for='mSeasonModal') Season
+                            input#mSeasonModal.form-control(name='mSeasonModal' type='number')
+                        .form-group
+                            label(for='mTeam1Modal') Home Team
+                            select#mTeam1Modal.form-control
+                        .form-group
+                            label(for='mTeam1ScoreModal') Home Score
+                            input#mTeam1ScoreModal.form-control(name='mTeam1ScoreModal' type='number')
+                        .form-group
+                            label(for='mTeam2Modal') Away Team
+                            select#mTeam2Modal.form-control
+                        .form-group
+                            label(for='mTeam2ScoreModal') Away Score
+                            input#mTeam2ScoreModal.form-control(name='mTeam2ScoreModal' type='number')
+                        .form-group
+                            label(for='mRoundModal') Season
+                            input#mRoundModal.form-control(name='mRoundModal' type='number')
+                        .form-group
+                            label(for='mLeagueModal') League
+                            select#mLeagueModal.form-control
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update
+
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateTable(); // initial fetch
+            populateSelect(); // fill select 
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            // Add league
+            $("#btnAdd").on('click', function(){
+                var newMatch = {
+                    season: $("#mSeason").val(),
+                    homeScore: $("#mTeam1Score").val(),
+                    awayScore: $("#mTeam2Score").val(),
+                    round: $("#mRound").val(),
+                    league: $("#mLeague").val(),
+                    homeTeam: $("#mTeam1").val(),
+                    awayTeam: $("#mTeam2").val(),
+                }
+
+                if (!newMatch.season || !newMatch. homeScore || !newMatch.awayScore || !newMatch.round
+                    || !newMatch.homeTeam || !newMatch.awayTeam || !newMatch.league) {
+                    toastr.error('All required fields must be filled.')
+                    return;
+                }
+
+                if(newMatch.homeTeam == newMatch.awayTeam) {
+                    toastr.error('Teams can\'t be the same.')
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/matches',
+                    data: newMatch,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('Match added successfully!');
+                        populateTable(); //refresh
+                        document.getElementById("addForm").reset(); //reset
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding match...');
+                    }
+                });   
+            });
+        });
+
+        // Get all records
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/matches',
+                dataType: 'json',
+                success: function(data){
+                    $("#matchTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var matchData = {
+                            id: data[i].id,
+                            season: data[i].season,
+                            round: data[i].round,
+                            t1Score: data[i].t1_score,
+                            t2Score: data[i].t2_score
+                        }
+
+                        var team1Url = '/api/teams/' + data[i].t1_id;
+                        $.ajax({
+                            type: 'GET',
+                            url: team1Url,
+                            async: false,
+                            success: function(teamData){
+                                matchData.t1 = teamData.t_name;
+                            }
+                        });
+
+                        var team2Url = '/api/teams/' + data[i].t2_id;
+                        $.ajax({
+                            type: 'GET',
+                            url: team2Url,
+                            async: false,
+                            success: function(teamData){
+                                matchData.t2 = teamData.t_name;
+                            }
+                        });
+
+                        var leagueUrl = '/api/leagues/' + data[i].l_id;
+                        $.ajax({
+                            type: 'GET',
+                            url: leagueUrl,
+                            async: false,
+                            success: function(leagueData){
+                                matchData.league = leagueData.l_name;
+                            }
+                        });
+
+                        var row = `
+                            <tr class='trophyRow' id='${matchData.id}'>
+                                <td>${matchData.id}</td>
+                                <td>${matchData.season}</td>
+                                <td>${matchData.t1}</td>
+                                <td>${matchData.t1Score}</td>
+                                <td>${matchData.t2}</td>
+                                <td>${matchData.t2Score}</td>
+                                <td>${matchData.round}</td>
+                                <td>${matchData.league}</td>
+                            </tr>
+                        `;
+                        $("#matchTableBody").append(row);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching matches...')
+                }
+            });
+        }
+
+        // Get select options (FK)
+        function populateSelect(){
+            // Get teams
+            $.ajax({
+                type: 'GET',
+                url: '/api/teams',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].t_name, data[i].t_id);
+                        var option2 = new Option(data[i].t_name, data[i].t_id);
+                        var option3 = new Option(data[i].t_name, data[i].t_id);
+                        var option4 = new Option(data[i].t_name, data[i].t_id);
+                        $(option1).html(data[i].t_name);
+                        $(option2).html(data[i].t_name);
+                        $("#mTeam1").append(option1);
+                        $("#mTeam2").append(option2);
+                        $("#mTeam1Modal").append(option3);
+                        $("#mTeam2Modal").append(option4);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            });
+
+            // Get leagues
+            $.ajax({
+                type: 'GET',
+                url: '/api/leagues',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].l_name, data[i].l_id);
+                        var option2 = new Option(data[i].l_name, data[i].l_id);
+                        $(option1).html(data[i].l_name);
+                        $(option2).html(data[i].l_name);
+                        $("#mLeague").append(option1);
+                        $("#mLeagueModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            });
+        }
+
+        // Open modal if clicked on a row
+        function openModal(id){
+            var url = '/api/matches/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    $("#matchModal").modal('show');
+                    $("#mIdModal").val(data.id);
+                    $("#mSeasonModal").val(data.season);
+                    $("#mRoundModal").val(data.round);
+                    $("#mTeam1Modal").val(data.t1_id);
+                    $("#mTeam1ScoreModal").val(data.t1_score);
+                    $("#mTeam2Modal").val(data.t2_id);
+                    $("#mTeam2ScoreModal").val(data.t2_score);
+                    $("#mLeagueModal").val(data.l_id);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching match...');
+                }
+            });
+        }
+
+        // Delete row 
+        function deleteRow(){
+            var id = $("#mIdModal").val();
+            var url = '/api/matches/' + id;
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function(data){
+                    toastr.success('Match deleted successfully!');
+                    populateTable();
+                    $("#matchModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting match!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var match = {
+                season: $("#mSeasonModal").val(),
+                round: $("#mRoundModal").val(),
+                t1_id: $("#mTeam1Modal").val(),
+                t1_score: $("#mTeam1ScoreModal").val(),
+                t2_id: $("#mTeam2Modal").val(),
+                t2_score: $("#mTeam2ScoreModal").val(),
+                l_id: $("#mLeagueModal").val(),
+            }
+
+            if (!match.season || !match.t1_score || !match.t2_score || !match.round
+                || !match.t1_id || !match.t2_id || !match.l_id) {
+                toastr.error('All required fields must be filled.')
+                return;
+            }
+
+            if(match.t1_id == match.t2_id) {
+                toastr.error('Teams can\'t be the same.')
+                return;
+            }
+
+            var id = $("#mIdModal").val();
+            var url = '/api/matches/' + id;
+            $.ajax({
+                type: 'PUT',
+                dataType: 'json',
+                data: match,
+                url: url,
+                success: function(data){
+                    toastr.success('Match updated successfully!');
+                    populateTable();
+                    $("#matchModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating match!');
+                }
+            });
+        }
+        

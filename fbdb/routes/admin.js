@@ -7,14 +7,18 @@ router.get('/country', function(req, res, next){
 
 router.get('/league', function(req, res, next){
     res.render('admin_league', { title: 'FBDB - Manage Leagues' });
-})
+});
 
 router.get('/team', function(req, res, next){
     res.render('admin_team', { title: 'FBDB - Manage Teams' });
-})
+});
 
 router.get('/trophy', function(req, res, next){
     res.render('admin_trophy', { title: 'FBDB - Manage Trophies' });
-})
+});
+
+router.get('/match', function(req, res, next){
+    res.render('admin_match', { title: 'FBDB - Manage Matches' });
+});
 
 module.exports = router;
