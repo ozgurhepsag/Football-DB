@@ -1,0 +1,204 @@
+extends ../layout
+
+block content
+    .container
+        // Add league form
+        .mb-5.mt-5
+            h4 Add a new league
+            form.form-inline
+                .form-group.mr-sm-2
+                    input#leagueName.form-control(type='text' name='leagueName' placeholder='League name')
+                .form-group.mr-sm-2
+                    select#leagueSelectCountry.form-control
+                .form-group.mr-sm-2     
+                    button#btnAdd.btn.btn-success(type='button') Add
+        
+        // Display leagues
+        h3 Leagues
+        table#leagueTable.table.table-hover
+            caption Click on leagues to update/delete
+            thead.thead-dark
+                tr
+                    th ID
+                    th League
+                    th Country
+                    th Country flag
+            tbody#leagueTableBody
+    
+    // Modal - to delete and update
+    #leagueModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='leagueModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#leagueModalLabel League Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='leagueIdModal') League ID (disabled)
+                            input#leagueIdModal.form-control(name='leagueIdModal' type='text' disabled)
+                        .form-group
+                            label(for='leagueNameModal') League name
+                            input#leagueNameModal.form-control(name='leagueNameModal' type='text')
+                        .form-group
+                            label(for='leagueSelectCountryModal') Country
+                            select#leagueSelectCountryModal.form-control
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteLeague()') Delete
+                    button.btn.btn-success(type='button' onclick='updateLeague()') Update
+
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateTable(); // initial fetch
+            populateSelect(); // fill select 
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            // Add league
+            $("#btnAdd").on('click', function(){
+                var league = {
+                    l_name: $("#leagueName").val(),
+                    c_id: $("#leagueSelectCountry").val()
+                }
+                if (league.l_name < 1) {
+                    toastr.error('League name can\'t be empty.')
+                    return;
+                }
+                if (!league.c_id) {
+                    toastr.error('You must choose a country.')
+                    return;
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/leagues',
+                    data: league,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('League added successfully!');
+                        populateTable(); //refresh
+                        $("#leagueName").val("");
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding country...');
+                    }
+                });   
+            });
+        });
+
+        // Get all records
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/leagues',
+                dataType: 'json',
+                success: function(data){
+                    $("#leagueTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var row = "<tr class='rowLeague' id='"+ data[i].l_id +"'><td>"+ data[i].l_id + "</td><td>" + data[i].l_name + "</td><td>" + data[i].c_name + "</td><td><img height='48px;' src='" + data[i].c_flag + "' alt='flag'/></td></tr>";
+                        $("#leagueTableBody").append(row);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...')
+                }
+            });
+        }
+
+        // Get select options (FK)
+        function populateSelect(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/countries',
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].c_name, data[i].c_id);
+                        var option2 = new Option(data[i].c_name, data[i].c_id);
+                        $(option1).html(data[i].c_name);
+                        $(option2).html(data[i].c_name);
+                        $("#leagueSelectCountry").append(option1);
+                        $("#leagueSelectCountryModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            })
+        }
+
+        // Open modal if clicked on a row
+        function openModal(id){
+            var url = '/api/leagues/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    console.log(data);
+                    $("#leagueModal").modal('show');
+                    $("#leagueIdModal").val(data.l_id);
+                    $("#leagueNameModal").val(data.l_name);
+                    $("#leagueSelectCountryModal").val(data.c_id);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching country...');
+                }
+            });
+        }
+
+        // Delete country 
+        function deleteLeague(){
+            var countryId = $("#leagueIdModal").val();
+            var url = '/api/leagues/' + countryId;
+            $.ajax({
+                type: 'DELETE',
+                url: url,
+                success: function(data){
+                    toastr.success('League deleted successfully!');
+                    populateTable();
+                    $("#leagueModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting league!');
+                }
+            });
+        }
+
+        // Update league
+        function updateLeague(){
+            var league = {
+                l_id: $("#leagueIdModal").val(),
+                l_name: $("#leagueNameModal").val(),
+                c_id: $("#leagueSelectCountryModal").val(), 
+            }
+
+            if (!league.l_id || !league.l_name || !league.c_id){
+                toastr.error('All fields must be filled!');
+                return;
+            }
+
+            var url = '/api/leagues/' + league.l_id;
+            $.ajax({
+                type: 'PUT',
+                dataType: 'json',
+                data: league,
+                url: url,
+                success: function(data){
+                    toastr.success('League updated successfully!');
+                    populateTable();
+                    $("#leagueModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating league!');
+                }
+            });
+        }
+        

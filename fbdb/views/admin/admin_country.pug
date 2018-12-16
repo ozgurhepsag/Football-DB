@@ -13,7 +13,8 @@ block content
                         input#countryFlag.custom-file-input(type='file' name='countryFlag' accept='image/*')
                         label.custom-file-label(for='countryFlag') Choose flag
                 .form-group.mr-sm-2     
-                    button#btnAdd.btn.btn-success(type='button') +
+                    button#btnAdd.btn.btn-success(type='button') Add                      
+                        
         
         // Display countries
         h3 Countries
@@ -43,6 +44,12 @@ block content
                         .form-group
                             label(for='countryNameModal') Country name
                             input#countryNameModal.form-control(name='countryNameModal' type='text')
+                    form
+                        .form-group
+                            .custom-file
+                                input#countryFlagModal.custom-file-input(type='file' name='countryFlagModal' accept='image/*')
+                                label.custom-file-label(for='countryFlagModal') Choose flag
+                            img#flagModal(height="32px;")
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteCountry()') Delete
@@ -61,6 +68,10 @@ block content
             // Add country
             $("#btnAdd").on('click', function(){
                 var reader = new FileReader();
+                if (!$("#countryFlag")[0].files[0]) {
+                    toastr.error('Image can\'t be empty.')
+                    return;
+                }
                 reader.readAsDataURL($("#countryFlag")[0].files[0]);
                 // read is async, so wait til its done
                 reader.onload = function (readerEvt) {
@@ -93,7 +104,6 @@ block content
                         }
                     });  
                 };
-               
             });
         });
 
@@ -105,9 +115,8 @@ block content
                 dataType: 'json',
                 success: function(data){
                     $("#countryTableBody").empty(); // clear table
-                    var fetchedCountries = data.countries;
-                    for(var i=0; i<fetchedCountries.length; i++){
-                        var row = "<tr class='rowCountry' id='"+ fetchedCountries[i].idCountry +"'><td>"+ fetchedCountries[i].idCountry + "</td><td>" + fetchedCountries[i].name + "</td><td><img height='48px;' src='" + fetchedCountries[i].flag + "' alt='flag'/></td></tr>";
+                    for(var i=0; i<data.length; i++){
+                        var row = "<tr class='rowCountry' id='"+ data[i].c_id +"'><td>"+ data[i].c_id + "</td><td>" + data[i].c_name + "</td><td><img height='48px;' src='" + data[i].c_flag + "' alt='flag'/></td></tr>";
                         $("#countryTableBody").append(row);
                     }
                 },
@@ -119,16 +128,18 @@ block content
 
         // Open modal if clicked on a row
         function openModal(countryId){
+            $("#countryFlagModal").val(''); // clear file input
+
             var url = '/api/countries/' + countryId;
             $.ajax({
                 type: 'GET',
                 url: url,
                 dataType: 'json',
                 success: function(data){
-                    var country = data.country;
                     $("#countryModal").modal('show');
-                    $("#countryIdModal").val(country.idCountry);
-                    $("#countryNameModal").val(country.name);
+                    $("#countryIdModal").val(data.c_id);
+                    $("#countryNameModal").val(data.c_name);
+                    $("#flagModal").attr('src', data.c_flag);
                 },
                 error: function(data){
                     toastr.error('Error while fetching country...');
@@ -156,32 +167,68 @@ block content
 
         // Update country
         function updateCountry(){
-            var country = {
-                idCountry: $("#countryIdModal").val(),
-                name: $("#countryNameModal").val(),
-                flag: null
-            }
+            // If added new image
+            if($("#countryFlagModal")[0].files[0]){
+                var reader = new FileReader();
+                reader.readAsDataURL($("#countryFlagModal")[0].files[0]);
+                // read is async, so wait til its done
+                reader.onload = function (readerEvt) {
+                    console.log("hey");
+                    var binaryString = readerEvt.target.result;
+                    var country = {
+                        idCountry: $("#countryIdModal").val(),
+                        name: $("#countryNameModal").val(),
+                        flag: binaryString
+                    }
 
-            if (country.name == "" || country.idCountry == null){
-                toastr.error('All fields must be filled!');
-                return;
-            }
+                    if (country.name == "" || country.idCountry == null){
+                        toastr.error('All fields must be filled!');
+                        return;
+                    }
 
-            var url = '/api/countries/' + country.idCountry;
-            $.ajax({
-                type: 'PUT',
-                dataType: 'json',
-                data: country,
-                url: url,
-                success: function(data){
-                    toastr.success('Country updated successfully!');
-                    populateTable();
-                    $("#countryModal").modal('hide');
-                },
-                error: function(data){
-                    toastr.error('Error while updating country!');
+                    var url = '/api/countries/' + country.idCountry;
+                    $.ajax({
+                        type: 'PUT',
+                        dataType: 'json',
+                        data: country,
+                        url: url,
+                        success: function(data){
+                            toastr.success('Country updated successfully!');
+                            populateTable();
+                            $("#countryModal").modal('hide');
+                        },
+                        error: function(data){
+                            toastr.error('Error while updating country!');
+                        }
+                    });
+                };
+            } else {
+                var country = {
+                    idCountry: $("#countryIdModal").val(),
+                    name: $("#countryNameModal").val(),
+                    flag: $("#flagModal").attr("src")
                 }
-            });
+                if (country.name == "" || country.idCountry == null){
+                    toastr.error('All fields must be filled!');
+                    return;
+                }
+
+                var url = '/api/countries/' + country.idCountry;
+                $.ajax({
+                    type: 'PUT',
+                    dataType: 'json',
+                    data: country,
+                    url: url,
+                    success: function(data){
+                        toastr.success('Country updated successfully!');
+                        populateTable();
+                        $("#countryModal").modal('hide');
+                    },
+                    error: function(data){
+                        toastr.error('Error while updating country!');
+                    }
+                });
+            }      
         }
 
         function getBase64(file) {
