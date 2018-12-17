@@ -30,7 +30,6 @@ router.get('/trophies/:id', function(req, res, next){
 
     db.query(sql, [req.params.id], function(error, result){
         if (error) {
-            console.log("SQL: " + sql, "\n ERROR: "+ error);
             res.status(404).json({
                 error: "Failed to get trophy."
             });

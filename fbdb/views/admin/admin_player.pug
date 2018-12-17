@@ -2,3 +2,291 @@ extends ../layout
 
 block content
     .container
+        .mb-5.mt-5
+            legend(data-toggle="collapse" data-target="#addForm") Add player (click to expand)
+            form#addForm.collapse
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="pFirstName") First name
+                    .col-sm-10
+                        input#pFirstName.form-control(type="text" placeholder="First name" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="pLastName") Last name
+                    .col-sm-10
+                        input#pLastName.form-control(type="text" placeholder="Last name" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="pPosition") Position
+                    .col-sm-10
+                        select#pPosition.form-control(name='pPosition')
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="pBirthDate") Birth date
+                    .col-sm-10
+                        input#pBirthDate.form-control(type="date" placeholder="Birth date" required)
+                .form-group.row
+                    .col-sm-2(for="pImage") Image
+                    .col-sm-10
+                        .custom-file
+                            input#pImage.custom-file-input(type='file' name='pImage' accept='image/*')
+                            label.custom-file-label Choose file
+                .row
+                    .col-sm-2
+                    .col-sm-10
+                         button#btnAdd.btn.btn-success(type='button') Add
+
+        h3 Players
+        table#playerTable.table.table-hover
+            caption Click on players to update/delete
+            thead.thead-dark
+                tr
+                    th ID
+                    th First name
+                    th Last name
+                    th Position
+                    th Birth date
+                    th Image
+            tbody#playerTableBody 
+
+    // Modal - to delete and update
+    #playerModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='playerModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#playerModalLabel Player Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='pIdModal') Player ID (disabled)
+                            input#pIdModal.form-control(name='pIdModal' type='text' disabled)          
+                        .form-group
+                            label(for='pFirstNameModal') First name
+                            input#pFirstNameModal.form-control(name='pFirstNameModal' type='text')               
+                        .form-group
+                            label(for='pLastNameModal') Last name
+                            input#pLastNameModal.form-control(name='pLastNameModal' type='text')
+                        .form-group
+                            label(for='pPositionModal') Position
+                            select#pPositionModal.form-control(name='pPositionModal')
+                        .form-group
+                            label(for='pBirthDateModal') Birth date
+                            input#pBirthDateModal.form-control(name='pBirthDateModal' type='date')
+                        .form-group
+                            label Current image
+                            br
+                            img#imageModal(height="128px;")
+                        .form-group
+                            .custom-file
+                                input#pImageModal.custom-file-input(type='file' name='pImageModal' accept='image/*')
+                                label.custom-file-label(for='pImageModal') Choose image (empty to keep current)
+                        
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update   
+    
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateSelect();
+            populateTable();
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            $("#btnAdd").on('click', function(){
+                if (!$("#pImage")[0].files[0]) {
+                    toastr.error('Image can\'t be empty.')
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.readAsDataURL($("#pImage")[0].files[0]);
+                reader.onload = function (readerEvt) {
+                    var binaryString = readerEvt.target.result;      
+                    var newPlayer = {
+                        firstName: $("#pFirstName").val(),
+                        lastName: $("#pLastName").val(),
+                        position: $("#pPosition").val(),
+                        birthDate: $("#pBirthDate").val(),
+                        image: binaryString
+                    }
+
+                    // Check if any property is empty
+                    for (var key in newPlayer) {
+                        if (newPlayer[key] == null || newPlayer[key] == '') {
+                            toastr.error('All values must be filled in the form...');
+                            return;
+                        }
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/players',
+                        data: newPlayer,
+                        dataType: 'json',
+                        success: function(data){
+                            toastr.success('Player added successfully!');
+                            populateTable(); //refresh
+                            document.getElementById("addForm").reset(); //reset
+                        },
+                        error: function(data){
+                            toastr.error('Error while adding player...');
+                        }
+                    }); 
+                };        
+            });
+        });
+        
+        // Fill data to modla
+        function openModal(id){
+            $("#pImageModal").val(''); // clear file input
+
+            var url = '/api/players/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    var fetchedDate = new Date(data.p_bdate);
+                    var day = ("0" + fetchedDate.getDate()).slice(-2);
+                    var month = ("0" + (fetchedDate.getMonth() + 1)).slice(-2);
+                    var formattedDate = fetchedDate.getFullYear()+"-"+(month)+"-"+(day);
+
+                    $("#playerModal").modal('show');
+                    $("#pIdModal").val(data.p_id);
+                    $("#pFirstNameModal").val(data.p_fname);
+                    $("#pLastNameModal").val(data.p_lname);
+                    $("#pPositionModal").val(data.p_position);
+                    $("#pBirthDateModal").val(formattedDate);
+                    $("#imageModal").attr('src', data.p_img);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching player...');
+                }
+            });
+        }
+
+        // Delete row
+        function deleteRow(){
+            var id = $("#pIdModal").val();
+            var url = '/api/players/' + id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(data){
+                    toastr.success('Player deleted successfully!');
+                    populateTable();
+                    $("#playerModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting player!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var player = {
+                id: $("#pIdModal").val(),
+                firstName: $("#pFirstNameModal").val(),
+                lastName: $("#pLastNameModal").val(),
+                position: $("#pPositionModal").val(),
+                birthDate: $("#pBirthDateModal").val(),
+            }
+
+            if(!player.id || !player.firstName || !player.lastName || !player.position || !player.birthDate){
+                toastr.error('All required fields must be filled!');
+                return;
+            }
+            var url = '/api/players/' + player.id;
+
+            if($("#pImageModal")[0].files[0]) {
+                var reader = new FileReader();
+                reader.readAsDataURL($("#pImageModal")[0].files[0]);
+                reader.onload = function (readerEvt) {
+                    var binaryString = readerEvt.target.result;
+                    player.image = binaryString;
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: player,
+                        success: function(data){
+                            toastr.success('Player updated successfully!');
+                            populateTable();
+                            $("#playerModal").modal('hide');
+                        },
+                        error: function(data){
+                            toastr.error('Error while updating player!');
+                        }
+                    });
+                }
+            } else {
+                player.image = $("#imageModal").attr("src");
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: player,
+                    success: function(data){
+                        toastr.success('Player updated successfully!');
+                        populateTable();
+                        $("#playerModal").modal('hide');
+                    },
+                    error: function(data){
+                        toastr.error('Error while updating player!');
+                    }
+                });
+            }
+
+        }
+
+        // Add leauges to select inputs
+        function populateSelect(){
+            var positions = [
+                'GK',
+                'RB',
+                'CB',
+                'LB',
+                'CM',
+                'RM',
+                'LM',
+                'ST'
+            ]
+            for(let i=0; i<positions.length; i++) {
+                var option1 = new Option(positions[i], positions[i]);
+                var option2 = new Option(positions[i], positions[i]);
+                $(option1).html(positions[i]);
+                $(option2).html(positions[i]);
+                $("#pPosition").append(option1);
+                $("#pPositionModal").append(option2);
+            }
+        }
+
+        // Populate teams table
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/players',
+                dataType: 'json',
+                success: function(data){
+                    $("#playerTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var row = `
+                            <tr class='rowLeague' id='${data[i].p_id}'>
+                                <td>${data[i].p_id}</td>
+                                <td>${data[i].p_fname}</td>
+                                <td>${data[i].p_lname}</td>
+                                <td>${data[i].p_position}</td>
+                                <td>${new Date(data[i].p_bdate).toDateString()}</td>
+                                <td><img height='48' src='${data[i].p_img}'></td>
+                            </tr>"
+                        `;
+                        $("#playerTableBody").append(row);          
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching players...')
+                }
+            });
+        }
+        
