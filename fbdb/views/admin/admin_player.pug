@@ -150,7 +150,7 @@ block content
                 success: function(data){
                     var fetchedDate = new Date(data.p_bdate);
                     var day = ("0" + fetchedDate.getDate()).slice(-2);
-                    var month = ("0" + (fetchedDate.getMonth() + 1)).slice(-2);
+                    var month = ("0" + (fetchedDate.getMonth())).slice(-2);
                     var formattedDate = fetchedDate.getFullYear()+"-"+(month)+"-"+(day);
 
                     $("#playerModal").modal('show');
