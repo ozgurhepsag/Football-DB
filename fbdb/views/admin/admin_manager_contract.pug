@@ -2,3 +2,287 @@ extends ../layout
 
 block content
     .container
+        .mb-5.mt-5
+            legend(data-toggle="collapse" data-target="#addForm") Add manager contract
+            form#addForm.collapse
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addStart") Start date
+                    .col-sm-10
+                        input#addStart.form-control(type="date" placeholder="Start date" required)              
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addEnd") End date
+                    .col-sm-10
+                        input#addEnd.form-control(type="date" placeholder="End date" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addValue") Value
+                    .col-sm-10
+                        .input-group
+                            .input-group-prepend
+                                .input-group-text @
+                            input#addValue.form-control(type="number" placeholder="Value" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addManager") Manager
+                    .col-sm-10
+                        select#addManager.form-control(required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addTeam") Team
+                    .col-sm-10
+                        select#addTeam.form-control(required)
+                .row
+                    .col-sm-2
+                    .col-sm-10
+                        button#btnAdd.btn.btn-success(type='button') Add
+        
+        h3 Contracts
+        table#contractTable.table.table-hover
+            caption Click on rows to update/delete
+            thead.thead-dark
+                tr
+                    th Contract ID
+                    th Manager
+                    th Team
+                    th Value
+                    th Start date
+                    th End date
+            tbody#contractTableBody
+
+    // Modal - to delete and update
+    #contractModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='contractModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#contractModalLabel Contract Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='idModal') Contract ID (disabled)
+                            input#idModal.form-control(name='idModal' type='text' disabled)          
+                        .form-group
+                            label(for='startModal') Start date
+                            input#startModal.form-control(name='startModal' type='date')
+                        .form-group
+                            label(for='endModal') End date
+                            input#endModal.form-control(name='endModal' type='date')                                    
+                        .form-group
+                            label(for='valueModal') Value
+                            .input-group
+                                .input-group-prepend
+                                    .input-group-text @
+                                input#valueModal.form-control(type="number" placeholder="Value" required)
+                        .form-group
+                            label(for='managerModal') Manager
+                            select#managerModal.form-control(required)
+                        .form-group
+                            label(for='teamModal') Team
+                            select#teamModal.form-control(required)               
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update 
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateSelect();
+            populateTable();
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            $("#btnAdd").on('click', function(){   
+                var newContract = {
+                    startDate: $("#addStart").val(),
+                    endDate: $("#addEnd").val(),
+                    value: $("#addValue").val(),
+                    manager: $("#addManager").val(),
+                    team: $("#addTeam").val(),
+                }
+
+                // Check if any property is empty
+                for (var key in newContract) {
+                    if (newContract[key] == null || newContract[key] == '') {
+                        toastr.error('All values must be filled in the form...');
+                        return;
+                    }
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/manager_contracts',
+                    data: newContract,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('Contract added successfully!');
+                        populateTable(); //refresh
+                        document.getElementById("addForm").reset(); //reset
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding contract...');
+                    }
+                });                
+            });
+        });
+        
+        // Fill data to modla
+        function openModal(id){
+            var url = '/api/manager_contracts/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    var startDate = new Date(data.c_start);
+                    var endDate = new Date(data.c_end);
+                    var startFormattedDate = startDate.getFullYear() + "-" + zeroFill(startDate.getMonth()+1, 2) + "-" + zeroFill(startDate.getDate(), 2);
+                    var endFormattedDate = endDate.getFullYear() + "-" + zeroFill(endDate.getMonth()+1, 2) + "-" + zeroFill(endDate.getDate(), 2);
+
+                    $("#idModal").val(data.c_id);
+                    $("#startModal").val(startFormattedDate);
+                    $("#endModal").val(endFormattedDate);
+                    $("#valueModal").val(data.c_value);
+                    $("#managerModal").val(data.m_id);
+                    $("#teamModal").val(data.t_id);
+                    $("#contractModal").modal('show');
+                },
+                error: function(data){
+                    toastr.error('Error while fetching contract...');
+                }
+            });
+        }
+
+        // Delete row
+        function deleteRow(){
+            var id = $("#idModal").val();
+            var url = '/api/manager_contracts/' + id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(data){
+                    toastr.success('Contract deleted successfully!');
+                    populateTable();
+                    $("#contractModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting contract!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var contract = {
+                id: $("#idModal").val(),
+                startDate: $("#startModal").val(),
+                endDate: $("#endModal").val(),
+                value: $("#valueModal").val(),
+                manager: $("#managerModal").val(),
+                team: $("#teamModal").val()
+            }
+
+            // Check if any property is empty
+            for (var key in contract) {
+                if (contract[key] == null || contract[key] == '') {
+                    toastr.error('All values must be filled in the form...');
+                    return;
+                }
+            }
+
+            var url = '/api/manager_contracts/' + contract.id;
+
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: contract,
+                success: function(data){
+                    toastr.success('Contract updated successfully!');
+                    populateTable();
+                    $("#contractModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating contract!');
+                }
+            });
+        }
+
+        // Add leauges to select inputs
+        function populateSelect(){
+            // Get from players
+            $.ajax({
+                type: 'GET',
+                url: '/api/managers',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option((data[i].m_fname + " " + data[i].m_lname), data[i].m_id);
+                        var option2 = new Option((data[i].m_fname + " " + data[i].m_lname), data[i].m_id);
+                        $(option1).html(data[i].m_fname + " " + data[i].m_lname);
+                        $(option2).html(data[i].m_fname + " " + data[i].m_lname);
+                        $("#addManager").append(option1);
+                        $("#managerModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching players...');
+                }
+            });
+
+            // Get from teams
+            $.ajax({
+                type: 'GET',
+                url: '/api/teams',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].t_name, data[i].t_id);
+                        var option2 = new Option(data[i].t_name, data[i].t_id);
+                        $(option1).html(data[i].t_name);
+                        $(option2).html(data[i].t_name);
+                        $("#addTeam").append(option1);
+                        $("#teamModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching teams...');
+                }
+            });
+        }
+
+        // Populate teams table
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/manager_contracts',
+                dataType: 'json',
+                success: function(data){
+                    $("#contractTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var row = `
+                            <tr id='${data[i].c_id}'>
+                                <td>${data[i].c_id}</td>
+                                <td>${data[i].m_fname + ' ' + data[i].m_lname}</td>
+                                <td>${data[i].t_name}</td>
+                                <td>$${data[i].c_value}</td>
+                                <td>${new Date(data[i].c_start).toDateString()}</td>
+                                <td>${new Date(data[i].c_end).toDateString()}</td>
+                            </tr>"
+                        `;
+                        $("#contractTableBody").append(row);          
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching contracts...')
+                }
+            });
+        }
+
+        function zeroFill(number, width) {
+            width -= number.toString().length;
+            if(width > 0) {
+                return new Array(width + (/\./.test(number) ? 2 : 1)).join('0') + number;
+            }
+            return number + ""; // always return a string
+        }
+        
