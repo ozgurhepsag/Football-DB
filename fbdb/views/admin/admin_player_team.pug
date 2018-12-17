@@ -2,3 +2,152 @@ extends ../layout
 
 block content
     .container
+        .mb-5.mt-5
+            legend(data-toggle="collapse" data-target="#addForm") Add player to teams
+            form#addForm.collapse
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addNumber") Shirt number
+                    .col-sm-10
+                        input#addNumber.form-control(type="number" placeholder="Shirt number" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addPlayer") Player
+                    .col-sm-10
+                        select#addPlayer.form-control(required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="addTeam") Team
+                    .col-sm-10
+                        select#addTeam.form-control(required)
+                .row
+                    .col-sm-2
+                    .col-sm-10
+                         button#btnAdd.btn.btn-success(type='button') Add
+
+        h3 Players
+        table#playerTable.table.table-hover
+            caption Click on rows to delete
+            thead.thead-dark
+                tr
+                    th Player
+                    th Number
+                    th Team
+            tbody#playerTableBody
+
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateSelect();
+            populateTable();
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                deleteRow($(this)[0].id);
+            });
+
+            $("#btnAdd").on('click', function(){
+                var newTeamPlayer = {
+                    number: $("#addNumber").val(),
+                    team: $("#addTeam").val(),
+                    player: $("#addPlayer").val()
+                }   
+                console.log(newTeamPlayer);        
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/player_team',
+                    data: newTeamPlayer,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('Player added successfully!');
+                        populateTable(); //refresh
+                        document.getElementById("addForm").reset(); //reset
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding player...');
+                    }
+                });          
+            });
+        });
+        
+
+        // Delete row
+        function deleteRow(param){
+            var params = param.split('-');
+            console.log(params);
+            var data = {
+                number: params[0],
+                player: params[1],
+                team: params[2]
+            }
+            $.ajax({
+                url: '/api/player_team/',
+                type: 'DELETE',
+                data: data,
+                success: function(data){
+                    toastr.success('Player deleted successfully!');
+                    populateTable();
+                },
+                error: function(data){
+                    toastr.error('Error while deleting player!');
+                }
+            });
+        }
+
+        // Add leauges to select inputs
+        function populateSelect(){
+            // Get from players
+            $.ajax({
+                type: 'GET',
+                url: '/api/players',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option = new Option((data[i].p_fname + " " + data[i].p_lname), data[i].p_id);
+                        $(option).html(data[i].p_fname + " " + data[i].p_lname);
+                        $("#addPlayer").append(option);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            });
+
+            // Get from teams
+            $.ajax({
+                type: 'GET',
+                url: '/api/teams',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option = new Option(data[i].t_name, data[i].t_id);
+                        $(option).html(data[i].t_name);
+                        $("#addTeam").append(option);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            });
+        }
+
+        // Populate teams table
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/player_team',
+                dataType: 'json',
+                success: function(data){
+                    $("#playerTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                        var row = `
+                            <tr id="${data[i].number+"-"+data[i].p_id+"-"+data[i].t_id}">
+                                <td>${data[i].p_fname + " " + data[i].p_lname}</td>
+                                <td>${data[i].number}</td>
+                                <td>${data[i].t_name}</td>
+                            </tr>"
+                        `;
+                        $("#playerTableBody").append(row);          
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching players...')
+                }
+            });
+        }

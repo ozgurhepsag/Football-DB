@@ -118,7 +118,6 @@ block content
                 url: '/api/countries',
                 dataType: 'json',
                 success: function(data){
-                    console.log(data);
                     for(let i=0; i<data.length; i++) {
                         var option1 = new Option(data[i].c_name, data[i].c_id);
                         var option2 = new Option(data[i].c_name, data[i].c_id);
