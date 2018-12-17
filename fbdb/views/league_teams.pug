@@ -2,22 +2,24 @@ extends layout
 
 block content
     .container
-        h3 Teams
+        h2 Standings
         table#teamTable.table.table-hover
             thead.thead-dark
                 tr
-                    th ID
                     th Team
-                    th Foundation
-                    th Stadium
-                    th Logo
-                    th Color 1
-                    th Color 2
+                    th Played
+                    th Won
+                    th Drawn
+                    th Lost
+                    th For
+                    th Against
+                    th GD
+                    th Points
             tbody#teamTableBody    
 
     script(type='text/javascript').
         $(document).ready(function(){
-           populateTable(); // initial fetch
+           populateTable(); // initial fetch          
         });
 
         // Get all records
@@ -27,16 +29,46 @@ block content
                 url: window.location.pathname + '/list',
                 dataType: 'json',
                 success: function(data){
-                    console.log(data);
-                    for(var i=0; i<data.length; i++){     
-                        var row = "<tr class='rowLeague' id='" + data[i].t_id + "'><td>" + data[i].t_id + "</td><td>" + data[i].t_name + "</td><td>" + data[i].t_year + "</td>" +
-                                "<td>" + data[i].t_stadium + "</td><td><img height='48' src='" + data[i].t_logo+ "'></td><td bgcolor='" + data[i].t_color1 + "'></td>" +
-                                "<td bgcolor='" + data[i].t_color2 + "'></td></tr>";
+                    for(var i in data){     
+                        var row = "<tr class='rowTeam' id='" + data[i][9] + "'><td>" + data[i][0] + "</td><td>" + data[i][1] + "</td><td>" + data[i][2] + "</td>" +
+                                "<td>" + data[i][3] + "</td><td>" + data[i][4] + "</td><td>" + data[i][5] + "</td>" +
+                                "<td>" + data[i][6] + "</td><td>" + data[i][7] + "</td><td>" + data[i][8] + "</td></tr>";
                         $("#teamTableBody").append(row);
                     }
+                    sortTable();
                 },
                 error: function(data){
                     toastr.error('Error while fetching leagues...');
                 }
             });
-        };                                       
+        }; 
+
+        function sortTable(){
+            var table, rows, switching, i, x, y, shouldSwitch;
+            table = document.getElementById("teamTable");
+            switching = true;
+
+            while (switching) {
+
+                switching = false;
+                rows = table.rows;
+                console.log(rows);
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+
+                    x = rows[i].getElementsByTagName("TD")[8];
+                    y = rows[i + 1].getElementsByTagName("TD")[8];
+
+                    if (Number(x.innerHTML) < Number(y.innerHTML)) {
+
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+
+                if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                }
+            }
+        }                                      
