@@ -34,7 +34,7 @@ router.get('/player_contract', function(req, res, next){
 });
 
 router.get('/player_statistics', function(req, res, next){
-    res.render('admin_player_statitstics', { title: 'FBDB - Manage Player Statistics' });
+    res.render('admin_player_statistics', { title: 'FBDB - Manage Player Statistics' });
 });
 
 router.get('/player_team', function(req, res, next){
