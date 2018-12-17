@@ -2,3 +2,303 @@ extends ../layout
 
 block content
     .container
+        .mb-5.mt-5
+            legend(data-toggle="collapse" data-target="#addForm") Add player statistics (click to expand)
+            form#addForm.collapse
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sSeason") Season
+                    .col-sm-10
+                        input#sSeason.form-control(type="number" placeholder="Season" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sGoal") Goal
+                    .col-sm-10
+                        input#sGoal.form-control(type="number" placeholder="Goal" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sAssist") Assist
+                    .col-sm-10
+                        input#sAssist.form-control(type="number" placeholder="Assist" required)
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sPlayer" required) Player
+                    .col-sm-10
+                        select#sPlayer.form-control
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sTeam" required) Team
+                    .col-sm-10
+                        select#sTeam.form-control
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="sLeague" required) League
+                    .col-sm-10
+                        select#sLeague.form-control
+                .row
+                    .col-sm-2
+                    .col-sm-10
+                         button#btnAdd.btn.btn-success(type='button') Add
+                    
+        h3 Statistics
+        table#statisticTable.table.table-hover
+            caption Click on statistics to update/delete
+            thead.thead-dark
+                tr
+                    th ID
+                    th Player
+                    th Goal
+                    th Assist
+                    th Team
+                    th League
+            tbody#statisticTableBody
+    
+    // Modal - to delete and update
+    #statisticModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='statisticModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5.modal-title#statisticModalLabel Statistic Update/Delete
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                        span(aria-hidden='true') &times;
+                .modal-body
+                    form
+                        .form-group
+                            label(for='sIdModal') Statistic ID (disabled)
+                            input#sIdModal.form-control(name='sIdModal' type='text' disabled)
+                    form
+                        .form-group
+                            label(for='sSeasonModal') Season
+                            input#sSeasonModal.form-control(name='sSeasonModal' type='number')
+                    form
+                        .form-group
+                            label(for='sGoalModal') Goal
+                            input#sGoalModal.form-control(name='sGoalModal' type='number')
+                    form
+                        .form-group
+                            label(for='sAssistModal') Assist
+                            input#sAssistModal.form-control(name='sAssistModal' type='number')
+                    form
+                        .form-group
+                            label(for='sPlayerModal') Player
+                            select#sPlayerModal.form-control(name='sPlayerModal')
+                    form
+                        .form-group
+                            label(for='sTeamModal') Team
+                            select#sTeamModal.form-control(name='sTeamModal')
+                    form
+                        .form-group
+                            label(for='sLeagueModal') League
+                            select#sLeagueModal.form-control(name='sLeagueModal')
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
+                    button.btn.btn-success(type='button' onclick='updateRow()') Update
+    
+    script(type='text/javascript').
+        $(document).ready(function(){
+            populateSelect();
+            populateTable();
+
+            // row clicked
+            $(document).on('click', 'tr', function(){
+                openModal($(this)[0].id);
+            });
+
+            $("#btnAdd").on('click', function(){
+                var newStats = {
+                    season: $("#sSeason").val(),
+                    assist: $("#sAssist").val(),
+                    goal: $("#sGoal").val(),
+                    player: $("#sPlayer").val(),
+                    team: $("#sTeam").val(),
+                    league: $("#sLeague").val()
+                }
+
+                // Check if any property is empty
+                for (var key in newStats) {
+                    if (newStats[key] == null || newStats[key] == '') {
+                        toastr.error('All values must be filled in the form...');
+                        return;
+                    }
+                }
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/player_statistics',
+                    data: newStats,
+                    dataType: 'json',
+                    success: function(data){
+                        toastr.success('Statistic added successfully!');
+                        populateTable(); //refresh
+                        document.getElementById("addForm").reset(); //reset
+                    },
+                    error: function(data){
+                        toastr.error('Error while adding statistic...');
+                    }
+                }); 
+                       
+            });
+        });
+        
+        // Fill data to modla
+        function openModal(id){
+            var url = '/api/player_statistics/' + id;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(data){
+                    $("#statisticModal").modal('show');
+                    $("#sIdModal").val(data.s_id);
+                    $("#sSeasonModal").val(data.s_season);
+                    $("#sGoalModal").val(data.s_goal);
+                    $("#sAssistModal").val(data.s_assist);
+                    $("#sPlayerModal").val(data.p_id);
+                    $("#sTeamModal").val(data.t_id);
+                    $("#sLeagueModal").val(data.l_id);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching statistic...');
+                }
+            });
+        }
+
+        // Delete row
+        function deleteRow(){
+            var id = $("#sIdModal").val();
+            var url = '/api/player_statistics/' + id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function(data){
+                    toastr.success('Row deleted successfully!');
+                    populateTable();
+                    $("#statisticModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while deleting row!');
+                }
+            });
+        }
+
+        // Update row
+        function updateRow(){
+            var newStatistic = {
+                id: $("#sIdModal").val(),
+                season: $("#sSeasonModal").val(),
+                goal: $("#sGoalModal").val(),
+                assist: $("#sAssistModal").val(),
+                player: $("#sPlayerModal").val(),
+                team: $("#sTeamModal").val(),
+                league: $("#sLeagueModal").val()
+            }
+
+            // Check if any property is empty
+            for (var key in newStatistic) {
+                if (newStatistic[key] == null || newStatistic[key] == '') {
+                    toastr.error('All values must be filled in the form...');
+                    return;
+                }
+            }
+            var url = '/api/player_statistics/' + newStatistic.id;
+
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                data: newStatistic,
+                success: function(data){
+                    toastr.success('Row updated successfully!');
+                    populateTable();
+                    $("#statisticModal").modal('hide');
+                },
+                error: function(data){
+                    toastr.error('Error while updating row!');
+                }
+            });
+        }
+
+        // Add leauges to select inputs
+        function populateSelect(){
+            // Fill leagues
+            $.ajax({
+                type: 'GET',
+                url: '/api/leagues',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].l_name, data[i].l_id);
+                        var option2 = new Option(data[i].l_name, data[i].l_id);
+                        $(option1).html(data[i].l_name);
+                        $(option2).html(data[i].l_name);
+                        $("#sLeague").append(option1);
+                        $("#sLeagueModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            })
+
+            // Fill teams
+            $.ajax({
+                type: 'GET',
+                url: '/api/teams',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option(data[i].t_name, data[i].t_id);
+                        var option2 = new Option(data[i].t_name, data[i].t_id);
+                        $(option1).html(data[i].t_name);
+                        $(option2).html(data[i].t_name);
+                        $("#sTeam").append(option1);
+                        $("#sTeamModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            })
+
+            // Fill players
+            $.ajax({
+                type: 'GET',
+                url: '/api/players',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var option1 = new Option((data[i].p_fname + " " + data[i].p_lname), data[i].p_id);
+                        var option2 = new Option((data[i].p_fname + " " + data[i].p_lname), data[i].p_id);
+                        $(option1).html(data[i].p_fname + " " + data[i].p_lname);
+                        $(option2).html(data[i].p_fname + " " + data[i].p_lname);
+                        $("#sPlayer").append(option1);
+                        $("#sPlayerModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching countries...');
+                }
+            });
+        }
+
+        // Populate teams table
+        function populateTable(){
+            $.ajax({
+                type: 'GET',
+                url: '/api/player_statistics',
+                dataType: 'json',
+                success: function(data){
+                    $("#statisticTableBody").empty(); // clear table
+                    for(var i=0; i<data.length; i++){
+                         var row = `
+                            <tr class='rowLeague' id='${data[i].s_id}'>
+                                <td>${data[i].s_id}</td>
+                                <td>${data[i].p_fname + " " + data[i].p_lname}</td>
+                                <td>${data[i].s_goal}</td>
+                                <td>${data[i].s_assist}</td>
+                                <td>${data[i].t_name}</td>
+                                <td>${data[i].l_name}</td>
+                            </tr>"
+                        `;
+                        $("#statisticTableBody").append(row);                        
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching statistics...')
+                }
+            });
+        }
