@@ -30,10 +30,13 @@ block content
                 dataType: 'json',
                 success: function(data){
                     for(var i in data){     
-                        var row = "<tr class='rowTeam' id='" + data[i][9] + "'><td>" + data[i][0] + "</td><td>" + data[i][1] + "</td><td>" + data[i][2] + "</td>" +
+                        var row = "<tr data-href='/team/" + data[i][9] + "' class='rowTeam' id='" + data[i][9] + "'><td>" + data[i][0] + "</td><td>" + data[i][1] + "</td><td>" + data[i][2] + "</td>" +
                                 "<td>" + data[i][3] + "</td><td>" + data[i][4] + "</td><td>" + data[i][5] + "</td>" +
                                 "<td>" + data[i][6] + "</td><td>" + data[i][7] + "</td><td>" + data[i][8] + "</td></tr>";
                         $("#teamTableBody").append(row);
+                        $('tr[data-href]').on("click", function() {
+                            document.location = $(this).data('href');
+                        });
                     }
                     sortTable();
                 },

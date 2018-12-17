@@ -90,7 +90,6 @@ router.get('/:id/teams/list', function(req, res, next){
                 }
                 
             }
-            console.log(table);
             res.status(200).json(table);
         });
 
