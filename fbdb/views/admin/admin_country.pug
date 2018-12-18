@@ -67,12 +67,14 @@ block content
 
             // Add country
             $("#btnAdd").on('click', function(){
-                var reader = new FileReader();
+                // If image is empty, return error
                 if (!$("#countryFlag")[0].files[0]) {
                     toastr.error('Image can\'t be empty.')
                     return;
                 }
-                reader.readAsDataURL($("#countryFlag")[0].files[0]);
+
+                var reader = new FileReader();
+                reader.readAsDataURL($("#countryFlag")[0].files[0]);      
                 // read is async, so wait til its done
                 reader.onload = function (readerEvt) {
                     var binaryString = readerEvt.target.result;
@@ -80,14 +82,20 @@ block content
                         name: $("#countryName").val(),
                         flag: binaryString
                     }
+
+                    // Check country name is valid
                     if (country.name.length < 1){
                         toastr.error('Country name can\'t be empty.')
                         return;
                     }
+
+                    // Check image is valid
                     if (!binaryString) {
                         toastr.error('Image can\'t be empty.')
                         return;
                     }
+
+                    // POST API request
                     $.ajax({
                         type: 'POST',
                         url: '/api/countries',
@@ -109,6 +117,7 @@ block content
 
         // Get countries from API
         function populateTable(){
+            // GET API request
             $.ajax({
                 type: 'GET',
                 url: '/api/countries',
@@ -129,8 +138,9 @@ block content
         // Open modal if clicked on a row
         function openModal(countryId){
             $("#countryFlagModal").val(''); // clear file input
-
             var url = '/api/countries/' + countryId;
+
+            // GET API request
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -151,6 +161,8 @@ block content
         function deleteCountry(){
             var countryId = $("#countryIdModal").val();
             var url = '/api/countries/' + countryId;
+
+            // DELETE API request
             $.ajax({
                 type: 'DELETE',
                 url: url,
@@ -229,17 +241,4 @@ block content
                     }
                 });
             }      
-        }
-
-        function getBase64(file) {
-            var reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function (readerEvt) {
-                var binaryString = readerEvt.target.result;
-                return binaryString;
-            };
-            reader.onerror = function (error) {
-                return -1;
-            };
-        }
-        
+        }        

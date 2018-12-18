@@ -20,15 +20,15 @@ block content
                 .form-group.row
                     label.col-sm-2.col-form-label(for="sPlayer" required) Player
                     .col-sm-10
-                        select#sPlayer.form-control
+                        select#sPlayer.form-control(style="width: 100%;")
                 .form-group.row
                     label.col-sm-2.col-form-label(for="sTeam" required) Team
                     .col-sm-10
-                        select#sTeam.form-control
+                        select#sTeam.form-control(style="width: 100%;")
                 .form-group.row
                     label.col-sm-2.col-form-label(for="sLeague" required) League
                     .col-sm-10
-                        select#sLeague.form-control
+                        select#sLeague.form-control(style="width: 100%;")
                 .row
                     .col-sm-2
                     .col-sm-10
@@ -75,15 +75,15 @@ block content
                     form
                         .form-group
                             label(for='sPlayerModal') Player
-                            select#sPlayerModal.form-control(name='sPlayerModal')
+                            select#sPlayerModal.form-control(name='sPlayerModal' style="width: 100%;")
                     form
                         .form-group
                             label(for='sTeamModal') Team
-                            select#sTeamModal.form-control(name='sTeamModal')
+                            select#sTeamModal.form-control(name='sTeamModal' style="width: 100%;")
                     form
                         .form-group
                             label(for='sLeagueModal') League
-                            select#sLeagueModal.form-control(name='sLeagueModal')
+                            select#sLeagueModal.form-control(name='sLeagueModal' style="width: 100%;")
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
@@ -91,6 +91,13 @@ block content
     
     script(type='text/javascript').
         $(document).ready(function(){
+            // Select2 elements initialize
+            $("#sPlayer").select2({ width: 'resolve' });
+            $("#sTeam").select2({ width: 'resolve' });
+            $("#sLeague").select2({ width: 'resolve' });
+            $("#sPlayerModal").select2({ width: 'resolve' });
+            $("#sTeamModal").select2({ width: 'resolve' });
+            $("#sLeagueModal").select2({ width: 'resolve' });
             populateSelect();
             populateTable();
 
@@ -148,9 +155,9 @@ block content
                     $("#sSeasonModal").val(data.s_season);
                     $("#sGoalModal").val(data.s_goal);
                     $("#sAssistModal").val(data.s_assist);
-                    $("#sPlayerModal").val(data.p_id);
-                    $("#sTeamModal").val(data.t_id);
-                    $("#sLeagueModal").val(data.l_id);
+                    $("#sPlayerModal").val(data.p_id).trigger('change');
+                    $("#sTeamModal").val(data.t_id).trigger('change');
+                    $("#sLeagueModal").val(data.l_id).trigger('change');
                 },
                 error: function(data){
                     toastr.error('Error while fetching statistic...');

@@ -9,9 +9,9 @@ block content
                 .form-group.mr-sm-2
                     input#tSeason.form-control(type='number' name='tSeason' placeholder='Trophy year')
                 .form-group.mr-sm-2
-                    select#tTeam.form-control
+                    select#tTeam.form-control(style="width: 100%;")
                 .form-group.mr-sm-2
-                    select#tLeague.form-control
+                    select#tLeague.form-control(style="width: 100%;")
                 .form-group.mr-sm-2     
                     button#btnAdd.btn.btn-success(type='button') Add
         
@@ -45,10 +45,10 @@ block content
                             input#tSeasonModal.form-control(name='tSeasonModal' type='number')
                         .form-group
                             label(for='tTeamModal') Team
-                            select#tTeamModal.form-control
+                            select#tTeamModal.form-control(style="width: 100%;")
                         .form-group
                             label(for='tLeagueModal') League
-                            select#tLeagueModal.form-control
+                            select#tLeagueModal.form-control(style="width: 100%;")
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
@@ -57,6 +57,12 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
+            // Select2 elements initialize
+            $("#tTeam").select2({ width: 'resolve' });
+            $("#tLeague").select2({ width: 'resolve' });
+            $("#tTeamModal").select2({ width: 'resolve' });
+            $("#tLeagueModal").select2({ width: 'resolve' });
+
             populateTable(); // initial fetch
             populateSelect(); // fill select 
 
@@ -200,8 +206,8 @@ block content
                     $("#trophyModal").modal('show');
                     $("#tIdModal").val(data.id);
                     $("#tSeasonModal").val(data.season);
-                    $("#tTeamModal").val(data.t_id);
-                    $("#tLeagueModal").val(data.l_id);
+                    $("#tTeamModal").val(data.t_id).trigger('change');
+                    $("#tLeagueModal").val(data.l_id).trigger('change');
                 },
                 error: function(data){
                     toastr.error('Error while fetching trophy...');

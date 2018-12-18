@@ -2,6 +2,7 @@ extends ../layout
 
 block content
     .container
+        // Add player form
         .mb-5.mt-5
             legend(data-toggle="collapse" data-target="#addForm") Add player to teams
             form#addForm.collapse
@@ -12,16 +13,17 @@ block content
                 .form-group.row
                     label.col-sm-2.col-form-label(for="addPlayer") Player
                     .col-sm-10
-                        select#addPlayer.form-control(required)
+                        select#addPlayer.form-control(style="width: 100%" required)
                 .form-group.row
                     label.col-sm-2.col-form-label(for="addTeam") Team
                     .col-sm-10
-                        select#addTeam.form-control(required)
+                        select#addTeam.form-control(style="width: 100%" required)
                 .row
                     .col-sm-2
                     .col-sm-10
                          button#btnAdd.btn.btn-success(type='button') Add
 
+        // Display all data
         h3 Players
         table#playerTable.table.table-hover
             caption Click on rows to delete
@@ -34,21 +36,29 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
+            // Select2 elements initialize
+            $("#addPlayer").select2({ width: 'resolve' });
+            $("#addTeam").select2({ width: 'resolve' });
+
+            // Populate select options and table data
             populateSelect();
             populateTable();
 
-            // row clicked
+            // If row clicked
             $(document).on('click', 'tr', function(){
                 deleteRow($(this)[0].id);
             });
 
+            // If add clicked
             $("#btnAdd").on('click', function(){
+                // Create new player object
                 var newTeamPlayer = {
                     number: $("#addNumber").val(),
                     team: $("#addTeam").val(),
                     player: $("#addPlayer").val()
                 }   
-                console.log(newTeamPlayer);        
+       
+                // POST API request
                 $.ajax({
                     type: 'POST',
                     url: '/api/player_team',
@@ -66,33 +76,35 @@ block content
             });
         });
         
-
         // Delete row
         function deleteRow(param){
             var params = param.split('-');
-            console.log(params);
+
+            // Get delete object values
             var data = {
                 number: params[0],
                 player: params[1],
                 team: params[2]
             }
+
+            // DELETE API request
             $.ajax({
                 url: '/api/player_team/',
                 type: 'DELETE',
                 data: data,
                 success: function(data){
-                    toastr.success('Player deleted successfully!');
+                    toastr.success('Player deleted from the team successfully!');
                     populateTable();
                 },
                 error: function(data){
-                    toastr.error('Error while deleting player!');
+                    toastr.error('Error while deleting player from the team!');
                 }
             });
         }
 
-        // Add leauges to select inputs
+        // Fill options to select inputs
         function populateSelect(){
-            // Get from players
+            // GET API request for players
             $.ajax({
                 type: 'GET',
                 url: '/api/players',
@@ -105,7 +117,7 @@ block content
                     }
                 },
                 error: function(data){
-                    toastr.error('Error while fetching countries...');
+                    toastr.error('Error while fetching players to select input...');
                 }
             });
 
@@ -129,6 +141,7 @@ block content
 
         // Populate teams table
         function populateTable(){
+            // GET API request
             $.ajax({
                 type: 'GET',
                 url: '/api/player_team',
@@ -147,7 +160,7 @@ block content
                     }
                 },
                 error: function(data){
-                    toastr.error('Error while fetching players...')
+                    toastr.error('Error while fetching players to fill table...')
                 }
             });
         }

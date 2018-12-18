@@ -2,26 +2,41 @@ extends ../layout
 
 block content
     .container
-        // Add form
         .mb-5.mt-5
-            h4 Add a new match
-            form#addForm.form-inline
-                .form-group.mr-sm-2
-                    input#mSeason.form-control(type='number' name='mSeason' placeholder='Match season')
-                .form-group.mr-sm-2
-                    select#mTeam1.form-control
-                .form-group.mr-sm-2
-                    input#mTeam1Score.form-control(type='number' name='mTeam1Score' placeholder='Home score')
-                .form-group.mr-sm-2
-                    select#mTeam2.form-control
-                .form-group.mr-sm-2
-                    input#mTeam2Score.form-control(type='number' name='mTeam2Score' placeholder='Away score')
-                .form-group.mr-sm-2
-                    input#mRound.form-control(type='number' name='mRound' placeholder='Week / Round')
-                .form-group.mr-sm-2
-                    select#mLeague.form-control
-                .form-group.mr-sm-2     
-                    button#btnAdd.btn.btn-success(type='button') Add
+            legend(data-toggle="collapse" data-target="#addForm") Add new match
+            form#addForm
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mSeason") Match Season
+                    .col-sm-10
+                        input#mSeason.form-control(type='number' name='mSeason' placeholder='Match season')
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mTeam1") Home Team
+                    .col-sm-10
+                        select#mTeam1.form-control(style="width: 100%;")
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mTeam1Score") Home Score
+                    .col-sm-10
+                        input#mTeam1Score.form-control(type='number' name='mTeam1Score' placeholder='Home score')
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mTeam2") Away Team
+                    .col-sm-10
+                        select#mTeam2.form-control(style="width: 100%;")
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mTeam2Score") Away Score
+                    .col-sm-10
+                        input#mTeam2Score.form-control(type='number' name='mTeam2Score' placeholder='Away score')
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mRound") Round
+                    .col-sm-10
+                        input#mRound.form-control(type='number' name='mRound' placeholder='Week / Round')
+                .form-group.row
+                    label.col-sm-2.col-form-label(for="mLeague") League
+                    .col-sm-10
+                        select#mLeague.form-control(style="width: 100%;")
+                .row
+                    .col-sm-2
+                    .col-sm-10
+                        button#btnAdd.btn.btn-success(type='button') Add
         
         // Display rows
         h3 Matches
@@ -57,13 +72,13 @@ block content
                             input#mSeasonModal.form-control(name='mSeasonModal' type='number')
                         .form-group
                             label(for='mTeam1Modal') Home Team
-                            select#mTeam1Modal.form-control
+                            select#mTeam1Modal.form-control(style="width: 100%;")
                         .form-group
                             label(for='mTeam1ScoreModal') Home Score
                             input#mTeam1ScoreModal.form-control(name='mTeam1ScoreModal' type='number')
                         .form-group
                             label(for='mTeam2Modal') Away Team
-                            select#mTeam2Modal.form-control
+                            select#mTeam2Modal.form-control(style="width: 100%;")
                         .form-group
                             label(for='mTeam2ScoreModal') Away Score
                             input#mTeam2ScoreModal.form-control(name='mTeam2ScoreModal' type='number')
@@ -72,7 +87,7 @@ block content
                             input#mRoundModal.form-control(name='mRoundModal' type='number')
                         .form-group
                             label(for='mLeagueModal') League
-                            select#mLeagueModal.form-control
+                            select#mLeagueModal.form-control(style="width: 100%;")
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
@@ -81,6 +96,14 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
+            // Initialize select2
+            $("#mTeam1").select2({ width: 'resolve' });
+            $("#mTeam2").select2({ width: 'resolve' });
+            $("#mLeague").select2({ width: 'resolve' });
+            $("#mTeam1Modal").select2({ width: 'resolve' });
+            $("#mTeam2Modal").select2({ width: 'resolve' });
+            $("#mLeagueModal").select2({ width: 'resolve' });
+
             populateTable(); // initial fetch
             populateSelect(); // fill select 
 
@@ -256,11 +279,11 @@ block content
                     $("#mIdModal").val(data.id);
                     $("#mSeasonModal").val(data.season);
                     $("#mRoundModal").val(data.round);
-                    $("#mTeam1Modal").val(data.t1_id);
+                    $("#mTeam1Modal").val(data.t1_id).trigger('change');
                     $("#mTeam1ScoreModal").val(data.t1_score);
-                    $("#mTeam2Modal").val(data.t2_id);
+                    $("#mTeam2Modal").val(data.t2_id).trigger('change');
                     $("#mTeam2ScoreModal").val(data.t2_score);
-                    $("#mLeagueModal").val(data.l_id);
+                    $("#mLeagueModal").val(data.l_id).trigger('change');
                 },
                 error: function(data){
                     toastr.error('Error while fetching match...');

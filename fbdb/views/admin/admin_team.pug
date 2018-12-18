@@ -34,7 +34,7 @@ block content
                 .form-group.row
                     label.col-sm-2.col-form-label(for="addLeague" required) League
                     .col-sm-10
-                        select#addLeague.form-control
+                        select#addLeague.form-control(style='width: 100%;')
                 .row
                     .col-sm-2
                     .col-sm-10
@@ -97,7 +97,7 @@ block content
                     form
                         .form-group
                             label(for='teamLeagueModal') League
-                            select#teamLeagueModal.form-control(name='teamLeagueModal')
+                            select#teamLeagueModal.form-control(name='teamLeagueModal' style='width: 100%;')
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
@@ -105,6 +105,10 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
+            // Select2 elements initialize
+            $("#addLeague").select2({ width: 'resolve' });
+            $("#teamLeagueModal").select2({ width: 'resolve' });
+
             populateSelect();
             populateTable();
 
@@ -176,7 +180,7 @@ block content
                     $("#teamStadiumModal").val(data.t_stadium);
                     $("#teamColor1Modal").val(data.t_color1);
                     $("#teamColor2Modal").val(data.t_color2);
-                    $("#teaLeagueModal").val(data.l_id);
+                    $("#teamLeagueModal").val(data.l_id).trigger('change');
                     $("#logoModal").attr('src', data.t_logo);
                 },
                 error: function(data){

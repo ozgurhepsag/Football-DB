@@ -23,11 +23,11 @@ block content
                 .form-group.row
                     label.col-sm-2.col-form-label(for="addManager") Manager
                     .col-sm-10
-                        select#addManager.form-control(required)
+                        select#addManager.form-control(style="width: 100%;" required)
                 .form-group.row
                     label.col-sm-2.col-form-label(for="addTeam") Team
                     .col-sm-10
-                        select#addTeam.form-control(required)
+                        select#addTeam.form-control(style="width: 100%;" required)
                 .row
                     .col-sm-2
                     .col-sm-10
@@ -73,10 +73,10 @@ block content
                                 input#valueModal.form-control(type="number" placeholder="Value" required)
                         .form-group
                             label(for='managerModal') Manager
-                            select#managerModal.form-control(required)
+                            select#managerModal.form-control(style="width: 100%;" required)
                         .form-group
                             label(for='teamModal') Team
-                            select#teamModal.form-control(required)               
+                            select#teamModal.form-control(style="width: 100%;" required)               
                 .modal-footer
                     button.btn.btn-secondary(type='button' data-dismiss='modal') Close
                     button.btn.btn-danger(type='button' onclick='deleteRow()') Delete
@@ -84,6 +84,12 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
+            // Initialize select2
+            $("#addTeam").select2({ width: 'resolve' });
+            $("#addManager").select2({ width: 'resolve' });
+            $("#managerModal").select2({ width: 'resolve' });
+            $("#teamModal").select2({ width: 'resolve' });
+
             populateSelect();
             populateTable();
 
@@ -143,8 +149,8 @@ block content
                     $("#startModal").val(startFormattedDate);
                     $("#endModal").val(endFormattedDate);
                     $("#valueModal").val(data.c_value);
-                    $("#managerModal").val(data.m_id);
-                    $("#teamModal").val(data.t_id);
+                    $("#managerModal").val(data.m_id).trigger('change');
+                    $("#teamModal").val(data.t_id).trigger('change');
                     $("#contractModal").modal('show');
                 },
                 error: function(data){
