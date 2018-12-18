@@ -1,9 +1,93 @@
 extends layout
 
 block content
-    .container
-        .mb-5.mt-5
-        h3 Teams
+    
+    section
+        .container.py-3
+            .card
+                .row
+                    .col-md-4
+                        img.w-100#clubImage(src='' width='100' height='200')
+                    .col-md-8.px-3
+                        .card-block.px-3#cardArea
+                            br
+                            p(align='center')
+                                a.btn.btn-primary(href='#') Trophies
+        .container
+            .mb-5.mt-5
+            h2 Squad
+            #area.card-columns
+                br
+
 
     script(type='text/javascript').
-        console.log("#{req.user}");
+            $(document).ready(function(){
+            fillTeamProfileCard(); // initial fetch and sorting table   
+            fillPlayerCards();     
+            });
+
+            // Get profile
+            function fillTeamProfileCard(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/profile',
+                    dataType: 'json',
+                    success: function(data){
+
+                        var teamName = document.createElement('h2');
+                        var header = document.createTextNode(data.t_name);
+                        teamName.align = "center";
+                        teamName.appendChild(header);
+                        
+                        var fy = document.createElement('h4');
+                        var year = document.createTextNode( "Foundation Year: " + data.t_fy);
+                        fy.align = "center";
+                        fy.appendChild(year);
+
+                        var stadium = document.createElement('h4');
+                        var stadiumName = document.createTextNode( "Stadium: " + data.t_stadium);
+                        stadium.align = "center";
+                        stadium.appendChild(stadiumName);
+                        
+                        
+                        document.getElementById('clubImage').src= data.t_logo;
+                        document.getElementById('cardArea').prepend(fy);
+                        document.getElementById('cardArea').prepend(stadium);
+                        document.getElementById('cardArea').prepend(teamName);
+
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching leagues...');
+                    }
+                });
+            };
+
+            // Get profile
+            function fillPlayerCards(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/players',
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data);
+                        
+                        for(var i=0; i<data.length; i++){ // fill the cards and append
+                        
+                            var card = 
+                            "<div class='card' width='50' height='100'> <img class='card-img-top' src='" + data[i].p_image + "' alt='Card image cap'> <div class='card-body'>" +
+                            "<h5 class='card-title'>" + data[i].p_fname + " " + data[i].p_lname + "</h5> <p>Position: " + data[i].p_pos + " </p> <p>Number: " + data[i].p_number + " </p> </p> <p>Birthdate: " + data[i].p_birthdate.substring(0, 10) + " </p> <a href='/players/" + data[i].p_id + "' class='btn btn-primary'> Statistics and Contrats </a> </div> </div>";
+                            d = document.createElement('div');
+                            d.id = data[i].p_id;
+                            
+                            document.getElementById('area').appendChild(d);
+                            document.getElementById(d.id).innerHTML = card; 
+                        
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching leagues...');
+                    }
+                });
+            };
+
+
