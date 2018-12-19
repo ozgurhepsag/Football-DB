@@ -7,7 +7,7 @@ block content
             .card
                 .row
                     .col-md-4
-                        img.w-100#clubImage(src='' width='100' height='200')
+                        img.w-100#clubImage(src='' width='auto' height='250')
                     .col-md-8.px-3
                         .card-block.px-3#cardArea
                             br
@@ -17,7 +17,7 @@ block content
             .mb-5.mt-5
             h2 Squad
             #area.card-columns
-                br
+            
 
 
     script(type='text/javascript').
@@ -74,7 +74,7 @@ block content
                         for(var i=0; i<data.length; i++){ // fill the cards and append
                         
                             var card = 
-                            "<div class='card' width='50' height='100'> <img class='card-img-top' src='" + data[i].p_image + "' alt='Card image cap'> <div class='card-body'>" +
+                            "<div style='height:550px;' class='card'> <img  width='auto' height='300px' class='card-img-top' src='" + data[i].p_image + "' alt='Card image cap'> <div class='card-body'>" +
                             "<h5 class='card-title'>" + data[i].p_fname + " " + data[i].p_lname + "</h5> <p>Position: " + data[i].p_pos + " </p> <p>Number: " + data[i].p_number + " </p> </p> <p>Birthdate: " + data[i].p_birthdate.substring(0, 10) + " </p> <a href='/players/" + data[i].p_id + "' class='btn btn-primary'> Statistics and Contrats </a> </div> </div>";
                             d = document.createElement('div');
                             d.id = data[i].p_id;
