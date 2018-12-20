@@ -27,7 +27,8 @@ block content
                     th Home Score
                     th Away Score
                     th Away Team
-            tbody#teamTableBody
+            tbody#historyTableBody
+
     script(type='text/javascript').
         $(document).ready(function(){
            populateTable(); // initial fetch and sorting table 
@@ -97,11 +98,11 @@ block content
                     for(var i=0; i<data.length; i++){
                         var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
                                 "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
-                        $("#matchHistory").append(row);
+                        $("#historyTableBody").append(row);
                     }
                 },
                 error: function(data){
-                    toastr.error('Error while fetching leagues...');
+                    toastr.error('Error while fetching match histoey of the league...');
                 }
             });
         };                                     

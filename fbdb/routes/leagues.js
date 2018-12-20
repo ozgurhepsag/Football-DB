@@ -108,7 +108,7 @@ router.get('/list', function(req, res, next){ // league logosu eklenebilir
     db.query(sql, function(error, result){
         if (error) {
             res.status(404).json({
-                error: "Failed to get leagues."
+                error: "Failed to get teams."
             });
         }
         
@@ -128,7 +128,7 @@ router.get('/:id/teams/match_history', function(req, res, next){ // league logos
     db.query(sql, [req.params.id], function(error, result){
         if (error) {
             res.status(404).json({
-                error: "Failed to get leagues."
+                error: "Failed to get matches."
             });
         }
         

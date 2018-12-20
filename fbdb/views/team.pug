@@ -12,7 +12,24 @@ block content
                         .card-block.px-3#cardArea
                             br
                             p(align='center')
-                                a.btn.btn-primary(href='#') Trophies
+                                a.btn.btn-primary(href='#') Trophies    
+        
+        .container
+            .mb-5.mt-5
+            h2 Match History
+        
+        .container
+            .mb-5.mt-5
+                table#matchHistory.table.table-hover
+                    thead.thead-dark
+                        tr
+                            th Week
+                            th Home Team
+                            th Home Score
+                            th Away Score
+                            th Away Team
+                    tbody#historyTableBody
+
         .container
             .mb-5.mt-5
             h2 Squad
@@ -23,7 +40,8 @@ block content
     script(type='text/javascript').
             $(document).ready(function(){
             fillTeamProfileCard(); // initial fetch and sorting table   
-            fillPlayerCards();     
+            fillPlayerCards();
+            populateHistoryTable();     
             });
 
             // Get profile
@@ -89,5 +107,23 @@ block content
                     }
                 });
             };
+
+            function populateHistoryTable(){
+            $.ajax({
+                type: 'GET',
+                url: window.location.pathname + '/match_history',
+                dataType: 'json',
+                success: function(data){
+                    for(var i=0; i<data.length; i++){
+                        var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
+                                "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
+                        $("#historyTableBody").append(row);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching match histoey of the league...');
+                }
+            });
+        }; 
 
 

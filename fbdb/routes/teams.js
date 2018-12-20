@@ -61,4 +61,24 @@ router.get('/:id/players', function(req, res, next){
     });
 });
 
+router.get('/:id/match_history', function(req, res, next){
+
+    var sql = `
+    SELECT m.round as m_round, ht.name as m_htname, m.homeScore as m_hscore, m.awayScore as m_ascore, awt.name as m_atname
+    FROM fbdb.match as m, fbdb.team as ht, fbdb.team as awt
+    WHERE ht.idTeam = m.homeTeam and awt.idTeam = m.awayTeam and m.season = 2018 and (m.homeTeam = ? or m.awayTeam = ?)
+    order by round DESC;
+    `;
+
+    db.query(sql, [req.params.id, req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get matches."
+            });
+        }
+        console.log(result, req.params.id);
+        res.status(200).json(result);
+    });
+});
+
 module.exports = router;
