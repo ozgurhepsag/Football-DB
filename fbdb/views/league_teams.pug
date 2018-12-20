@@ -15,11 +15,23 @@ block content
                     th Against
                     th GD
                     th Points
-            tbody#teamTableBody    
+            tbody#teamTableBody
 
+    .container
+        h2 Match History
+        table#matchHistory.table.table-hover
+            thead.thead-dark
+                tr
+                    th Week
+                    th Home Team
+                    th Home Score
+                    th Away Score
+                    th Away Team
+            tbody#teamTableBody
     script(type='text/javascript').
         $(document).ready(function(){
-           populateTable(); // initial fetch and sorting table        
+           populateTable(); // initial fetch and sorting table 
+           populateHistoryTable();       
         });
 
         // Get all records
@@ -74,4 +86,22 @@ block content
                 switching = true;
                 }
             }
-        }                                      
+        } 
+
+        function populateHistoryTable(){
+            $.ajax({
+                type: 'GET',
+                url: window.location.pathname + '/match_history',
+                dataType: 'json',
+                success: function(data){
+                    for(var i=0; i<data.length; i++){
+                        var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
+                                "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
+                        $("#matchHistory").append(row);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching leagues...');
+                }
+            });
+        };                                     
