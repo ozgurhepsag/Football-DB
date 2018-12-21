@@ -110,6 +110,7 @@ var usersRouter = require('./routes/users');
 var aboutRouter = require('./routes/about');
 var teamsRouter = require('./routes/teams');
 var leaguesRouter = require('./routes/leagues');
+var playersRouter = require('./routes/players');
 
 var app = express();
 
@@ -181,6 +182,8 @@ app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
 app.use('/teams', teamsRouter);
 app.use('/leagues', leaguesRouter);
+app.use('/players', playersRouter);
+
 
 // Api routes
 app.use('/api', apiCountryRouter);

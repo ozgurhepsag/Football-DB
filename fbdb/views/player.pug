@@ -1,0 +1,63 @@
+extends layout
+
+block content
+    section
+        .container.py-3
+            .card
+                .row
+                    .col-md-4
+                        img.w-100#playerImage(src='' width='auto' height='250')
+                    .col-md-8.px-3
+                        .card-block.px-3#cardArea
+
+    script(type='text/javascript').
+            $(document).ready(function(){
+            fillPlayerProfileCard(); // initial fetch and sorting table      
+            });
+
+                // Get profile
+            function fillPlayerProfileCard(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/profile',
+                    dataType: 'json',
+                    success: function(data){
+
+                        var playerName = document.createElement('h2');
+                        var header = document.createTextNode(data.p_fname + " " + data.p_lname);
+                        playerName.align = "center";
+                        playerName.appendChild(header);
+                        var blank = document.createElement('br');
+                        var blank2 = document.createElement('br');
+
+                        
+                        var posHd = document.createElement('h4');
+                        var pos = document.createTextNode( "Position: " + data.p_position);
+                        posHd.align = "center";
+                        posHd.appendChild(pos);
+
+                        var btHd = document.createElement('h4');
+                        var bt = document.createTextNode( "Birthdate: " + data.p_bt.substring(0, 10));
+                        btHd.align = "center";
+                        btHd.appendChild(bt);
+
+                        var numHd = document.createElement('h4');
+                        var num = document.createTextNode( "Jersey Number: " + data.p_number);
+                        numHd.align = "center";
+                        numHd.appendChild(num);
+                        
+                        
+                        document.getElementById('playerImage').src= data.p_image;
+                        document.getElementById('cardArea').appendChild(blank2);
+                        document.getElementById('cardArea').appendChild(playerName);
+                        document.getElementById('cardArea').appendChild(blank);
+                        document.getElementById('cardArea').appendChild(posHd);
+                        document.getElementById('cardArea').appendChild(numHd);
+                        document.getElementById('cardArea').appendChild(btHd);
+
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching leagues...');
+                    }
+                });
+            };

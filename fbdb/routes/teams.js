@@ -76,7 +76,6 @@ router.get('/:id/match_history', function(req, res, next){
                 error: "Failed to get matches."
             });
         }
-        console.log(result, req.params.id);
         res.status(200).json(result);
     });
 });
