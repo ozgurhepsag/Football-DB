@@ -21,8 +21,6 @@ router.get('/:id', function(req, res, next){
     });
 });
 
-//SELECT * FROM fbdb.team where idTeam = 1;
-
 router.get('/:id/profile', function(req, res, next){
 
     var sql = `
@@ -76,6 +74,26 @@ router.get('/:id/match_history', function(req, res, next){
                 error: "Failed to get matches."
             });
         }
+        res.status(200).json(result);
+    });
+});
+
+router.get('/:id/trophies', function(req, res, next){
+
+    var sql = `
+    SELECT tt.idTrophy as tr_id, tt.season as tr_season, t.name as tr_teamname, l.name as tr_league
+    FROM fbdb.team_trophies as tt, fbdb.team as t, fbdb.league as l
+    WHERE t.idTeam = tt.team and t.league = l.idLeague and t.idTeam = ?
+    ORDER BY tt.season DESC;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get matches."
+            });
+        }
+        
         res.status(200).json(result);
     });
 });

@@ -12,8 +12,27 @@ block content
                         .card-block.px-3#cardArea
                             br
                             p(align='center')
-                                a.btn.btn-primary(href='#') Trophies    
+                                img#trophiesImage(src='/images/trophiesicon.ico' width='40' height='40')
         
+        // Modal - Trophies
+        #trophiesModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='trophiesModalLabel' aria-hidden='true')
+            .modal-dialog(role='document')
+                .modal-content
+                    .modal-header
+                        h5.modal-title#trophiesModalLabel Trophies
+                        button.close(type='button' data-dismiss='modal' aria-label='Close')
+                            span(aria-hidden='true') &times;
+                    .modal-body
+                        .mb-5.mt-5
+                            table#trophiesHistory.table.table-striped
+                                thead
+                                    tr
+                                        th Season
+                                        th League/Tournament
+                                tbody#trophiesHistoryBody
+                    .modal-footer
+                        button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+
         .container
             .mb-5.mt-5
             h2 Match History
@@ -41,8 +60,15 @@ block content
             $(document).ready(function(){
             fillTeamProfileCard(); // initial fetch and sorting table   
             fillPlayerCards();
-            populateHistoryTable();     
+            populateHistoryTable(); 
+            populateTrophiesTable();   
+
+            $(document).ready(function () {
+                $("#trophiesImage").click(function () {
+                $('#trophiesModal').modal('show'); 
+                });
             });
+        });
 
             // Get profile
             function fillTeamProfileCard(){
@@ -66,9 +92,10 @@ block content
                         var stadiumName = document.createTextNode( "Stadium: " + data.t_stadium);
                         stadium.align = "center";
                         stadium.appendChild(stadiumName);
-                        
+                        var br = document.createElement('br');
                         
                         document.getElementById('clubImage').src= data.t_logo;
+                        document.getElementById('cardArea').prepend(br);
                         document.getElementById('cardArea').prepend(fy);
                         document.getElementById('cardArea').prepend(stadium);
                         document.getElementById('cardArea').prepend(teamName);
@@ -109,21 +136,39 @@ block content
             };
 
             function populateHistoryTable(){
-            $.ajax({
-                type: 'GET',
-                url: window.location.pathname + '/match_history',
-                dataType: 'json',
-                success: function(data){
-                    for(var i=0; i<data.length; i++){
-                        var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
-                                "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
-                        $("#historyTableBody").append(row);
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/match_history',
+                    dataType: 'json',
+                    success: function(data){
+                        for(var i=0; i<data.length; i++){
+                            var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
+                                    "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
+                            $("#historyTableBody").append(row);
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching match history of the league...');
                     }
-                },
-                error: function(data){
-                    toastr.error('Error while fetching match history of the league...');
-                }
-            });
-        }; 
+                });
+            }; 
+
+            function populateTrophiesTable(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/trophies',
+                    dataType: 'json',
+                    success: function(data){
+                        for(var i=0; i<data.length; i++){
+                            var row = "<tr><td>" + data[i].tr_season + "</td><td>" + data[i].tr_league + "</td></tr>";
+                            $("#trophiesHistoryBody").append(row);
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching match history of the league...');
+                    }
+                });
+            }; 
+
 
 
