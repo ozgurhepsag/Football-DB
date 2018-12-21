@@ -12,7 +12,7 @@ router.get('/:id/', function(req, res, next){
     db.query(sql, [req.params.id], function(error, result){
         if (error) {
             res.status(404).json({
-                error: "Failed to get leagues."
+                error: "Failed to get players."
             });
         }
         
@@ -32,7 +32,7 @@ router.get('/:id/profile', function(req, res, next){
     db.query(sql, [req.params.id], function(error, result){
         if (error) {
             res.status(404).json({
-                error: "Failed to get leagues."
+                error: "Failed to get profile."
             });
         }
         
