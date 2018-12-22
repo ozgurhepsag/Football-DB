@@ -7,7 +7,7 @@ router.get('/teams', function(req, res, next){
     var sql = `
         SELECT idTeam as t_id, name as t_name, foundationYear as t_year,
                stadium as t_stadium, logo as t_logo, color1 as t_color1, 
-               color2 as t_color2, league as l_id
+               color2 as t_color2, manager as m_id, league as l_id
         FROM fbdb.team; 
     `;
 
@@ -27,7 +27,7 @@ router.get('/teams/:id', function(req, res, next){
     var sql = `
         SELECT idTeam as t_id, name as t_name, foundationYear as t_year,
                stadium as t_stadium, logo as t_logo, color1 as t_color1, 
-               color2 as t_color2, league as l_id
+               color2 as t_color2, manager as m_id, league as l_id
         FROM fbdb.team
         WHERE idTeam = ?; 
     `;
@@ -46,11 +46,11 @@ router.get('/teams/:id', function(req, res, next){
 /* POST team */
 router.post('/teams', function(req, res, next){
     var sql = `
-        INSERT INTO fbdb.team(name, foundationYear, stadium, logo, color1, color2, league)
-        VALUES(?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO fbdb.team(name, foundationYear, stadium, logo, color1, color2, manager, league)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?);
     `;
 
-    db.query(sql, [req.body.name, req.body.foundation, req.body.stadium, req.body.logo, req.body.color1, req.body.color2, req.body.league], function(error, result){
+    db.query(sql, [req.body.name, req.body.foundation, req.body.stadium, req.body.logo, req.body.color1, req.body.color2, req.body.manager, req.body.league], function(error, result){
         if(error){
             res.status(404).json({
                 error: 'Failed to add team.',
@@ -88,11 +88,11 @@ router.put('/teams/:id', function(req, res, next){
     var sql = `
         UPDATE fbdb.team
         SET name = ?, foundationYear = ?, stadium = ?, logo = ?,
-            color1 = ?, color2 = ?, league = ?
+            color1 = ?, color2 = ?, manager = ?, league = ?
         WHERE idTeam = ?;
     `;
 
-    db.query(sql, [req.body.name, req.body.foundation, req.body.stadium, req.body.logo, req.body.color1, req.body.color2, req.body.league, req.body.id], function(error, result){
+    db.query(sql, [req.body.name, req.body.foundation, req.body.stadium, req.body.logo, req.body.color1, req.body.color2, req.body.manager, req.body.league, req.body.id], function(error, result){
         if(error){    
             console.log(error);
             res.status(404).json({
