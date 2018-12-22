@@ -32,6 +32,10 @@ block content
                     .col-sm-10
                         input#addColor2.form-control(type="color")
                 .form-group.row
+                    label.col-sm-2.col-form-label(for="addManager" required) Manager
+                    .col-sm-10
+                        select#addManager.form-control(style='width: 100%;')
+                .form-group.row
                     label.col-sm-2.col-form-label(for="addLeague" required) League
                     .col-sm-10
                         select#addLeague.form-control(style='width: 100%;')
@@ -52,6 +56,7 @@ block content
                     th Logo
                     th Color 1
                     th Color 2
+                    th Manager
                     th League
             tbody#teamTableBody    
 
@@ -96,6 +101,10 @@ block content
                             input#teamColor2Modal.form-control(name='teamColor2Modal' type='color')
                     form
                         .form-group
+                            label(for='teamManagerModal') Manager
+                            select#teamManagerModal.form-control(name='teamManagerModal' style='width: 100%;')
+                    form
+                        .form-group
                             label(for='teamLeagueModal') League
                             select#teamLeagueModal.form-control(name='teamLeagueModal' style='width: 100%;')
                 .modal-footer
@@ -106,6 +115,8 @@ block content
     script(type='text/javascript').
         $(document).ready(function(){
             // Select2 elements initialize
+            $("#addManager").select2({ width: 'resolve' });
+            $("#teamManagerModal").select2({ width: 'resolve' });
             $("#addLeague").select2({ width: 'resolve' });
             $("#teamLeagueModal").select2({ width: 'resolve' });
 
@@ -134,6 +145,7 @@ block content
                         logo: binaryString,
                         color1: $("#addColor1").val(),
                         color2: $("#addColor2").val(),
+                        manager: $("#addManager").val(),
                         league: $("#addLeague").val()
                     }
 
@@ -180,6 +192,7 @@ block content
                     $("#teamStadiumModal").val(data.t_stadium);
                     $("#teamColor1Modal").val(data.t_color1);
                     $("#teamColor2Modal").val(data.t_color2);
+                    $("#teamManagerModal").val(data.m_id).trigger('change'),
                     $("#teamLeagueModal").val(data.l_id).trigger('change');
                     $("#logoModal").attr('src', data.t_logo);
                 },
@@ -216,11 +229,12 @@ block content
                 stadium: $("#teamStadiumModal").val(),
                 color1: $("#teamColor1Modal").val(),
                 color2: $("#teamColor2Modal").val(),
+                manager: $("#teamManagerModal").val(),
                 league: $("#teamLeagueModal").val()
             }
 
             if(!newTeam.id || !newTeam.name || !newTeam.foundation || !newTeam.stadium ||
-                !newTeam.color1 || !newTeam.color2 || !newTeam.league){
+                !newTeam.color1 || !newTeam.color2 || !newTeam.league || !newTeam.manager){
                 toastr.error('All required fields must be filled!');
                 return;
             }
@@ -285,17 +299,53 @@ block content
                     toastr.error('Error while fetching leagues...');
                 }
             })
+
+            $.ajax({
+                type: 'GET',
+                url: '/api/managers',
+                dataType: 'json',
+                success: function(data){
+                    for(let i=0; i<data.length; i++) {
+                        var managerName = data[i].m_fname + " " + data[i].m_lname;
+                        var option1 = new Option(managerName, data[i].m_id);
+                        var option2 = new Option(managerName, data[i].m_id);
+                        $(option1).html(managerName);
+                        $(option2).html(managerName);
+                        $("#addManager").append(option1);
+                        $("#teamManagerModal").append(option2);
+                    }
+                },
+                error: function(data){
+                    toastr.error('Error while fetching managers...');
+                }
+            })
         }
 
         // Populate teams table
         function populateTable(){
+            let managers = {};
+            $.ajax({
+                type: 'GET',
+                url: '/api/managers',
+                dataType: 'json',
+                async: false,
+                success: function(managerData){
+                    for(let i=0; i<managerData.length; i++){
+                        var id = managerData[i].m_id;
+                        managers[id] = managerData[i].m_fname + " " + managerData[i].m_lname;
+                    }
+                }
+            });
+
+            console.log(managers);
             $.ajax({
                 type: 'GET',
                 url: '/api/teams',
                 dataType: 'json',
+                async:false,
                 success: function(data){
                     $("#teamTableBody").empty(); // clear table
-                    for(var i=0; i<data.length; i++){
+                    for(var i=0; i<data.length; i++){                       
                         // get league info
                         var url = '/api/leagues/' + data[i].l_id;
                         var teamData = data[i];
@@ -304,6 +354,8 @@ block content
                             url: url,
                             async: false,
                             success: function(leagueData) {
+                                console.log(managers);
+                               
                                 var row = `
                                     <tr class='rowLeague' id='${teamData.t_id}'>
                                         <td>${teamData.t_id}</td>
@@ -313,6 +365,7 @@ block content
                                         <td><img height='48' src='${teamData.t_logo}'></td>
                                         <td bgcolor='${teamData.t_color1}'></td>
                                         <td bgcolor='${teamData.t_color2}'></td>
+                                        <td>${managers[teamData.m_id]}</td>
                                         <td>${leagueData.l_name}</td>
                                     </tr>"
                                 `;
