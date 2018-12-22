@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    .container.py-3
+    .container
         .card
             .card-header#cardHeader
             .row
@@ -17,18 +17,36 @@ block content
     .container
         .mb-5.mt-5
             table#statistics.table.table-hover
-                thead.thead-dark
+                thead
                     tr
                         th Season
                         th Team
-                        th Goal
-                        th Assist
+                        th 
+                            img#trophiesImage(src='/images/goalicon.png' width='40' height='40' data-toggle='tooltip' title='Goals')
+                        th
+                            img#trophiesImage(src='/images/assisticon.png' width='40' height='40' data-toggle='tooltip' title='Assists')
                 tbody#statisticsBody
+    
+    .container
+        .mb-5.mt-5
+        h2 Contracts
+
+    .container
+        .mb-5.mt-5
+            table#contracts.table.table-hover
+                thead
+                    tr
+                        th Team
+                        th Start Date
+                        th End Date
+                        th Value
+                tbody#contractsBody
 
     script(type='text/javascript').
             $(document).ready(function(){
             fillPlayerProfileCard();   
             populateStatiticsTable();  
+            populateContractsTable();
             });
 
                 // Get profile
@@ -38,6 +56,8 @@ block content
                     url: window.location.pathname + '/profile',
                     dataType: 'json',
                     success: function(data){
+
+                        var date = new Date(data.p_bt).toDateString();
 
                         var playerName = document.createElement('h2');
                         var header = document.createTextNode(data.p_fname + " " + data.p_lname);
@@ -52,7 +72,7 @@ block content
                         posHd.appendChild(pos);
 
                         var btHd = document.createElement('h4');
-                        var bt = document.createTextNode( "Birthdate: " + data.p_bt.substring(0, 10));
+                        var bt = document.createTextNode( "Birthdate: " + date);
                         btHd.align = "center";
                         btHd.appendChild(bt);
 
@@ -65,7 +85,6 @@ block content
                         temp_link.href = '/teams/' + data.p_teamid;
                         temp_link.target = '';
                         temp_link.innerHTML = data.p_teamname;
-
 
                         var team = document.createElement("h2");
                         team.align = "center";
@@ -107,3 +126,24 @@ block content
                     }
                 });
             }; 
+
+            function populateContractsTable(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/contracts',
+                    dataType: 'json',
+                    success: function(data){
+                        for(var i=0; i<data.length; i++){
+                            var value = parseInt(data[i].c_value);
+                            var formattedValue = value.toLocaleString()
+                            var row = "<tr><td><a href='/teams/" + data[i].c_teamid + "'>" + data[i].c_teamname + "</a></td><td>" + new Date(data[i].c_start).toDateString() + "</td>" +
+                            "<td>" + new Date(data[i].c_end).toDateString() + "</td><td>$" + formattedValue + "</td></tr>";
+                            $("#contractsBody").append(row);
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching statistics...');
+                    }
+                });
+            }; 
+

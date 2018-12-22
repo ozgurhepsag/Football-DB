@@ -59,5 +59,24 @@ router.get('/:id/statistics', function(req, res, next){
     });
 });
 
+router.get('/:id/contracts', function(req, res, next){
+    var sql = `
+    SELECT t.name as c_teamname, pc.startDate as c_start, pc.endDate as c_end, pc.value as c_value, t.idTeam as c_teamid
+    FROM fbdb.player_contract as pc, fbdb.team as t
+    WHERE pc.team = t.idTeam and pc.player = ?
+    ORDER BY c_end DESC;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get contracts."
+            });
+        }
+        
+        res.status(200).json(result);
+    });
+});
+
 
 module.exports = router;
