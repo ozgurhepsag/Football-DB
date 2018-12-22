@@ -1,18 +1,16 @@
 extends layout
 
 block content
-    
-    section
-        .container.py-3
-            .card
-                .row
-                    .col-md-4
-                        img.w-100#clubImage(src='' width='auto' height='250')
-                    .col-md-8.px-3
-                        .card-block.px-3#cardArea
-                            br
-                            p(align='center')
-                                img#trophiesImage(src='/images/trophiesicon.ico' width='40' height='40')
+    .container.py-3
+        .card
+            .row
+                .col-md-4
+                    img.w-100#clubImage(src='' width='auto' height='250')
+                .col-md-8.px-3
+                    .card-block.px-3#cardArea
+                        br
+                        p(align='center')
+                            img#trophiesImage(src='/images/trophiesicon.ico' width='40' height='40' data-toggle='tooltip' title='Click to see Trophies.')
         
         // Modal - Trophies
         #trophiesModal.modal.fade(tabIndex='-1' role='dialog' aria-labelledby='trophiesModalLabel' aria-hidden='true')
@@ -33,26 +31,29 @@ block content
                     .modal-footer
                         button.btn.btn-secondary(type='button' data-dismiss='modal') Close
 
-        .container
-            .mb-5.mt-5
-            h2 Match History
-        
-        .container
-            .mb-5.mt-5
-                table#matchHistory.table.table-hover
-                    thead.thead-dark
-                        tr
-                            th Week
-                            th Home Team
-                            th Home Score
-                            th Away Score
-                            th Away Team
-                    tbody#historyTableBody
+    .container
+        .mb-5.mt-5
+        h2 Match History
 
-        .container
-            .mb-5.mt-5
-            h2 Squad
-            #area.card-columns
+    .container
+        .mb-5.mt-5
+            table#matchHistory.table.table-hover
+                thead.thead-dark
+                    tr
+                        th Week
+                        th Home Team
+                        th Home Score
+                        th Away Score
+                        th Away Team
+                tbody#historyTableBody
+
+    .container
+        .mb-5.mt-5
+        h2 Squad
+
+    .container
+        .mb-5.mt-5
+        #area.card-columns
             
 
             
@@ -142,8 +143,8 @@ block content
                     dataType: 'json',
                     success: function(data){
                         for(var i=0; i<data.length; i++){
-                            var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
-                                    "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
+                            var row = "<tr><td>" + data[i].m_round + "</td><td><a href='/teams/" + data[i].m_homeid + "'>" + data[i].m_htname + "</a></td><td>" + data[i].m_hscore + "</td>" +
+                                    "<td>" + data[i].m_ascore + "</td><td><a href='/teams/" + data[i].m_awayid + "'>" + data[i].m_atname + "</td></tr>";
                             $("#historyTableBody").append(row);
                         }
                     },
@@ -160,12 +161,14 @@ block content
                     dataType: 'json',
                     success: function(data){
                         for(var i=0; i<data.length; i++){
-                            var row = "<tr><td>" + data[i].tr_season + "</td><td>" + data[i].tr_league + "</td></tr>";
+                            var season = parseInt(data[i].tr_season);
+                            season += 1;
+                            var row = "<tr><td>" + data[i].tr_season + "-" + season + "</td><td><a href='/leagues/" + data[i].tr_leagueid + "/teams'>" + data[i].tr_league + "</a></td></tr>";
                             $("#trophiesHistoryBody").append(row);
                         }
                     },
                     error: function(data){
-                        toastr.error('Error while fetching match history of the league...');
+                        toastr.error('Error while fetching trophies...');
                     }
                 });
             }; 

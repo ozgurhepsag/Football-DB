@@ -10,8 +10,39 @@ router.get('/', function(req, res, next){
 });
 
 router.get('/:id/teams', function(req, res, next){
-    res.render('league_teams', {
-        title: 'Teams',
+    var sql = `
+    SELECT name as l_name
+    FROM fbdb.league
+    WHERE idLeague = ?;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get league."
+            });
+        }
+        
+        res.render('league_teams', {
+            title: "Teams - " + result[0].l_name,
+        });
+    });
+});
+
+router.get('/:id/teams/league_name', function(req, res, next){
+    var sql = `
+    SELECT name as l_name
+    FROM fbdb.league
+    WHERE idLeague = ?;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get league name."
+            });
+        }
+        res.status(200).json(result[0]);
     });
 });
 
@@ -119,7 +150,7 @@ router.get('/list', function(req, res, next){ // league logosu eklenebilir
 /* GET leagues match history. */
 router.get('/:id/teams/match_history', function(req, res, next){ // league logosu eklenebilir
     var sql = `
-    SELECT m.round as m_round, ht.name as m_htname, m.homeScore as m_hscore, m.awayScore as m_ascore, awt.name as m_atname
+    SELECT m.round as m_round, ht.name as m_htname, m.homeScore as m_hscore, m.awayScore as m_ascore, awt.name as m_atname, m.homeTeam as m_homeid, m.awayTeam as m_awayid
     FROM fbdb.match as m, fbdb.team as ht, fbdb.team as awt
     WHERE ht.idTeam = m.homeTeam and awt.idTeam = m.awayTeam and m.season = 2018 and m.league = ?
     ORDER BY round ASC;

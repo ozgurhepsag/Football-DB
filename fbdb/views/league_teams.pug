@@ -2,6 +2,9 @@ extends layout
 
 block content
     .container
+        h1#leagueName(align='center')
+
+    .container
         h2 Standings
         table#teamTable.table.table-hover
             thead.thead-dark
@@ -31,11 +34,11 @@ block content
 
     script(type='text/javascript').
         $(document).ready(function(){
-           populateTable(); // initial fetch and sorting table 
-           populateHistoryTable();       
+            populateTable(); // initial fetch and sorting table 
+            populateHistoryTable();
+            fillLeagueName();      
         });
 
-        // Get all records
         function populateTable(){
             $.ajax({
                 type: 'GET',
@@ -96,8 +99,8 @@ block content
                 dataType: 'json',
                 success: function(data){
                     for(var i=0; i<data.length; i++){
-                        var row = "<tr><td>" + data[i].m_round + "</td><td>" + data[i].m_htname + "</td><td>" + data[i].m_hscore + "</td>" +
-                                "<td>" + data[i].m_ascore + "</td><td>" + data[i].m_atname + "</td></tr>";
+                        var row = "<tr><td>" + data[i].m_round + "</td><td><a href='/teams/" + data[i].m_homeid + "'>" + data[i].m_htname + "</a></td><td>" + data[i].m_hscore + "</td>" +
+                                "<td>" + data[i].m_ascore + "</td><td><a href='/teams/" + data[i].m_awayid + "'>" + data[i].m_atname + "</a></td></tr>";
                         $("#historyTableBody").append(row);
                     }
                 },
@@ -105,4 +108,20 @@ block content
                     toastr.error('Error while fetching match histoey of the league...');
                 }
             });
-        };                                     
+        };
+  
+        function fillLeagueName(){
+            $.ajax({
+                type: 'GET',
+                url: window.location.pathname + '/league_name',
+                dataType: 'json',
+                success: function(data){
+                    $("#leagueName").append(data.l_name);
+                },
+                error: function(data){
+                    toastr.error('Error while fetching league name...');
+                }
+            });
+        };
+         
+                            

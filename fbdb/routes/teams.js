@@ -62,7 +62,7 @@ router.get('/:id/players', function(req, res, next){
 router.get('/:id/match_history', function(req, res, next){
 
     var sql = `
-    SELECT m.round as m_round, ht.name as m_htname, m.homeScore as m_hscore, m.awayScore as m_ascore, awt.name as m_atname
+    SELECT m.round as m_round, ht.name as m_htname, m.homeScore as m_hscore, m.awayScore as m_ascore, awt.name as m_atname, m.homeTeam as m_homeid, m.awayTeam as m_awayid
     FROM fbdb.match as m, fbdb.team as ht, fbdb.team as awt
     WHERE ht.idTeam = m.homeTeam and awt.idTeam = m.awayTeam and m.season = 2018 and (m.homeTeam = ? or m.awayTeam = ?)
     order by round DESC;
@@ -81,7 +81,7 @@ router.get('/:id/match_history', function(req, res, next){
 router.get('/:id/trophies', function(req, res, next){
 
     var sql = `
-    SELECT tt.idTrophy as tr_id, tt.season as tr_season, t.name as tr_teamname, l.name as tr_league
+    SELECT tt.idTrophy as tr_id, tt.season as tr_season, t.name as tr_teamname, l.name as tr_league, l.idLeague as tr_leagueid
     FROM fbdb.team_trophies as tt, fbdb.team as t, fbdb.league as l
     WHERE t.idTeam = tt.team and t.league = l.idLeague and t.idTeam = ?
     ORDER BY tt.season DESC;
@@ -93,7 +93,7 @@ router.get('/:id/trophies', function(req, res, next){
                 error: "Failed to get matches."
             });
         }
-        
+
         res.status(200).json(result);
     });
 });

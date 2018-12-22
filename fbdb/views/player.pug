@@ -1,18 +1,34 @@
 extends layout
 
 block content
-    section
-        .container.py-3
-            .card
-                .row
-                    .col-md-4
-                        img.w-100#playerImage(src='' width='auto' height='250')
-                    .col-md-8.px-3
-                        .card-block.px-3#cardArea
+    .container.py-3
+        .card
+            .card-header#cardHeader
+            .row
+                .col-md-4
+                    img.w-100#playerImage(src='' width='auto' height='250')
+                .col-md-8.px-3
+                    .card-block.px-3#cardArea
+
+    .container
+        .mb-5.mt-5
+        h2 Statistics
+
+    .container
+        .mb-5.mt-5
+            table#statistics.table.table-hover
+                thead.thead-dark
+                    tr
+                        th Season
+                        th Team
+                        th Goal
+                        th Assist
+                tbody#statisticsBody
 
     script(type='text/javascript').
             $(document).ready(function(){
-            fillPlayerProfileCard(); // initial fetch and sorting table      
+            fillPlayerProfileCard();   
+            populateStatiticsTable();  
             });
 
                 // Get profile
@@ -29,7 +45,6 @@ block content
                         playerName.appendChild(header);
                         var blank = document.createElement('br');
                         var blank2 = document.createElement('br');
-
                         
                         var posHd = document.createElement('h4');
                         var pos = document.createTextNode( "Position: " + data.p_position);
@@ -45,11 +60,22 @@ block content
                         var num = document.createTextNode( "Jersey Number: " + data.p_number);
                         numHd.align = "center";
                         numHd.appendChild(num);
-                        
+
+                        var temp_link = document.createElement("a");
+                        temp_link.href = '/teams/' + data.p_teamid;
+                        temp_link.target = '';
+                        temp_link.innerHTML = data.p_teamname;
+
+
+                        var team = document.createElement("h2");
+                        team.align = "center";
+                        team.innerHTML = "Current Team: ";
+                        team.appendChild(temp_link);
                         
                         document.getElementById('playerImage').src= data.p_image;
+                        document.getElementById('cardHeader').appendChild(playerName);
                         document.getElementById('cardArea').appendChild(blank2);
-                        document.getElementById('cardArea').appendChild(playerName);
+                        document.getElementById('cardArea').appendChild(team);
                         document.getElementById('cardArea').appendChild(blank);
                         document.getElementById('cardArea').appendChild(posHd);
                         document.getElementById('cardArea').appendChild(numHd);
@@ -61,3 +87,23 @@ block content
                     }
                 });
             };
+
+            function populateStatiticsTable(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/statistics',
+                    dataType: 'json',
+                    success: function(data){
+                        for(var i=0; i<data.length; i++){
+                            var season = parseInt(data[i].s_season);
+                            season += 1;
+                            var row = "<tr><td>" + data[i].s_season + "-" + season + "</td><td><a href='/teams/" + data[i].s_teamid + "'>" + data[i].s_team + "</a></td>" +
+                            "<td>" + data[i].s_goal + "</td><td>" + data[i].s_assist + "</td></tr>";
+                            $("#statisticsBody").append(row);
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching statistics...');
+                    }
+                });
+            }; 
