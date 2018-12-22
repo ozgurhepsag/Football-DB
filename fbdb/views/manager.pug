@@ -1,6 +1,99 @@
 extends layout
 
 block content
+    .container
+        .card
+            .card-header#cardHeader
+            .row
+                .col-md-4
+                    img.w-100#managerImage(src='' width='auto' height='250')
+                .col-md-8.px-3
+                    .card-block.px-3#cardArea
 
+    .container
+        .mb-5.mt-5
+        h2 Contracts
+
+    .container
+        .mb-5.mt-5
+            table#contracts.table.table-hover
+                thead
+                    tr
+                        th Team
+                        th Start Date
+                        th End Date
+                        th Value
+                tbody#contractsBody
+    
     script(type='text/javascript').
-        console.log("#{req.user}");
+            $(document).ready(function(){
+                fillManagerProfileCard();
+                populateContractsTable();
+            });
+
+                // Get profile
+            function fillManagerProfileCard(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/profile',
+                    dataType: 'json',
+                    success: function(data){
+
+                        var date = new Date(data.m_bt).toDateString();
+
+                        var managerName = document.createElement('h2');
+                        var header = document.createTextNode(data.m_fname + " " + data.m_lname);
+                        managerName.align = "center";
+                        managerName.appendChild(header);
+                        var blank = document.createElement('br');
+                        var blank2 = document.createElement('br');
+                        
+
+                        var btHd = document.createElement('h4');
+                        var bt = document.createTextNode( "Birthdate: " + date);
+                        btHd.align = "center";
+                        btHd.appendChild(bt);
+
+                        var temp_link = document.createElement("a");
+                        temp_link.href = '/teams/' + data.m_teamid;
+                        temp_link.target = '';
+                        temp_link.innerHTML = data.m_teamname;
+
+                        var team = document.createElement("h2");
+                        team.align = "center";
+                        team.innerHTML = "Current Team: ";
+                        team.appendChild(temp_link);
+                        
+                        document.getElementById('managerImage').src= data.m_image;
+                        document.getElementById('cardHeader').appendChild(managerName);
+                        document.getElementById('cardArea').appendChild(blank2);
+                        document.getElementById('cardArea').appendChild(team);
+                        document.getElementById('cardArea').appendChild(blank);
+                        document.getElementById('cardArea').appendChild(btHd);
+
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching leagues...');
+                    }
+                });
+            };
+
+            function populateContractsTable(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/contracts',
+                    dataType: 'json',
+                    success: function(data){
+                        for(var i=0; i<data.length; i++){
+                            var value = parseInt(data[i].c_value);
+                            var formattedValue = value.toLocaleString()
+                            var row = "<tr><td><a href='/teams/" + data[i].c_teamid + "'>" + data[i].c_teamname + "</a></td><td>" + new Date(data[i].c_start).toDateString() + "</td>" +
+                            "<td>" + new Date(data[i].c_end).toDateString() + "</td><td>$" + formattedValue + "</td></tr>";
+                            $("#contractsBody").append(row);
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching contract...');
+                    }
+                });
+            }; 

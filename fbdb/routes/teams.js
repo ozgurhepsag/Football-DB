@@ -98,4 +98,24 @@ router.get('/:id/trophies', function(req, res, next){
     });
 });
 
+router.get('/:id/manager', function(req, res, next){
+
+    var sql = `
+    SELECT manager as m_id, firstName as m_fname, lastName as m_lname, birthDate as m_bt, image as m_image
+    FROM fbdb.team, fbdb.manager
+    WHERE idManager = manager and fbdb.team.idTeam = ?;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get manager."
+            });
+        }
+
+        res.status(200).json(result[0]);
+    });
+});
+
+
 module.exports = router;

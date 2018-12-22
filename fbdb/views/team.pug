@@ -49,20 +49,27 @@ block content
 
     .container
         .mb-5.mt-5
+        h2 Manager
+
+    .container
+        .mb-5.mt-5
+        #managerArea.card-columns
+
+    .container
+        .mb-5.mt-5
         h2 Squad
 
     .container
         .mb-5.mt-5
         #area.card-columns
-            
-
-            
+                     
     script(type='text/javascript').
             $(document).ready(function(){
             fillTeamProfileCard(); // initial fetch and sorting table   
             fillPlayerCards();
             populateHistoryTable(); 
-            populateTrophiesTable();   
+            populateTrophiesTable();
+            fillManagerCard()   
 
             $(document).ready(function () {
                 $("#trophiesImage").click(function () {
@@ -167,6 +174,30 @@ block content
                     },
                     error: function(data){
                         toastr.error('Error while fetching trophies...');
+                    }
+                });
+            }; 
+
+            function fillManagerCard(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/manager',
+                    dataType: 'json',
+                    success: function(data){
+                        console.log(data);
+
+                        var card = 
+                        "<div style='height:550px;' class='card'> <img  width='auto' height='300px' class='card-img-top' src='" + data.m_image + "' alt='Card image cap'> <div class='card-body'>" +
+                        "<h5 class='card-title'>" + data.m_fname + " " + data.m_lname + "</h5></p><br> <p>Birthdate: " + new Date(data.m_bt).toDateString() + " </p> <br> <a href='/managers/" + data.m_id + "' class='btn btn-primary'> Profile </a> </div> </div>";
+                        d = document.createElement('div');
+                        d.id = 'manager';
+                            
+                        document.getElementById('managerArea').appendChild(d);
+                        document.getElementById(d.id).innerHTML = card; 
+
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching manager...');
                     }
                 });
             }; 
