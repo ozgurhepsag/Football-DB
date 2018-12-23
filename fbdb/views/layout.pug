@@ -31,17 +31,11 @@ html
             a.nav-link(href='/')
               | Home
           li.nav-item
-            a.nav-link(href='/') Top Players
+            a.nav-link(href='/') Players
           li.nav-item
-            a.nav-link(href='/') Top Teams
+            a.nav-link(href='/') Teams
             li.nav-item
-            a.nav-link(href='/leagues') Top Leagues
-          li.nav-item.dropdown
-            a#countriesDropdown.nav-link.dropdown-toggle(href='#' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
-              | Browse by Countries
-            .dropdown-menu(aria-labelledby='countriesDropdown')
-              a.dropdown-item(href='#') England
-              a.dropdown-item(href='#') Turkey
+            a.nav-link(href='/leagues') Leagues
           if req.user && req.user.role == 1
             li.nav-item.dropdown
               a#adminDropdown.nav-link.dropdown-toggle(href='#' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')

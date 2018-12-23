@@ -10,7 +10,7 @@ block content
                 .col-md-8.px-3
                     .card-block.px-3#cardArea
 
-    .container
+    .container  
         .mb-5.mt-5
         h2 Statistics
 
@@ -44,9 +44,10 @@ block content
 
     script(type='text/javascript').
             $(document).ready(function(){
-            fillPlayerProfileCard();   
-            populateStatiticsTable();  
-            populateContractsTable();
+                fillPlayerProfileCard();   
+                populateStatiticsTable();  
+                populateContractsTable();
+                getPlayerLikes();
             });
 
                 // Get profile
@@ -94,11 +95,25 @@ block content
                         document.getElementById('playerImage').src= data.p_image;
                         document.getElementById('cardHeader').appendChild(playerName);
                         document.getElementById('cardArea').appendChild(blank2);
-                        document.getElementById('cardArea').appendChild(team);
+                        document.getElementById('cardArea').appendChild(team);                 
                         document.getElementById('cardArea').appendChild(blank);
                         document.getElementById('cardArea').appendChild(posHd);
                         document.getElementById('cardArea').appendChild(numHd);
                         document.getElementById('cardArea').appendChild(btHd);
+                        $('#cardArea').append(`
+                            <div id="likeButtonDiv" class="text-center">
+                                <button id="likeButton" type="button" class="btn btn-primary" onclick="likePlayer()">
+                                    <span id="likeMessage">Like </span>
+                                    <span id="likeCount" class="badge badge-light"></span>
+                                    <span class="sr-only">unread messages</span>
+                                </button>
+                            </div>
+                        `);
+
+                        if (#{isLiked}) {
+                            console.log("hey");
+                            updateButton(true);
+                        }
 
                     },
                     error: function(data){
@@ -147,3 +162,58 @@ block content
                 });
             }; 
 
+            function getPlayerLikes(){
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/likes',
+                    dataType: 'json',
+                    success: function(data){
+                        $("#likeCount").empty();
+                        $("#likeCount").append(data.likes);       
+                    },
+                    error: function(data){
+                        toastr.error('Error while fetching likes...');
+                    }
+                });
+            }
+            
+            function isLoggedIn() {
+                if ("#{req.user}") return true;
+                else return false;   
+            }
+
+            function likePlayer() {
+                if(!isLoggedIn()) {
+                    toastr.warning('You need to be logged in for this action.');
+                } else {
+                    $.ajax({
+                        type: 'POST',
+                        url: window.location.pathname + '/likes/',
+                        success: function(data){
+                            getPlayerLikes();
+                            if (data.like) {
+                                updateButton(true);
+                            } else {
+                                updateButton(false);
+                            }
+                        },
+                        error: function(data){
+                            toastr.error('Error while submitting likes...');
+                        }
+                    });
+                }
+            }
+
+            function updateButton(isLiked) {
+                if(isLiked) {
+                    $("#likeButton").removeClass();
+                    $("#likeButton").addClass('btn');
+                    $("#likeButton").addClass('btn-success');
+                    $("#likeMessage").text("Unlike");
+                } else {
+                    $("#likeButton").removeClass();
+                    $("#likeButton").addClass('btn');
+                    $("#likeButton").addClass('btn-primary');
+                    $("#likeMessage").text("Like");
+                }
+            }

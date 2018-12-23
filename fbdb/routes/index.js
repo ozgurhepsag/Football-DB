@@ -6,23 +6,22 @@ let passport;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  var sql = "SELECT * FROM fbdb.player;"
-  let players = [];
-  db.query(sql, function(err, result){
-      if(err) throw err;
-      for(let i=0; i<result.length; i++){
-          players.push({
-              id: result[i].idPlayer,
-              firstName: result[i].firstName,
-              lastName: result[i].lastName,
-              position: result[i].position
-          });
-          console.log("Pushed");
-      }
-      console.log("Players length:" + players.length);
-      res.render('index', { title: 'FBDB - Football Database', players: players });
-  });
+    var sqlViewTopPlayers = `
+        SELECT *
+        FROM fbdb.top_10_players;
+    `;
 
+    db.query(sqlViewTopPlayers, function(error, result){
+        if (error) {
+            res.status(404).send('Not found');
+        }
+        res.render('index', { 
+            title: 'FBDB - Football Database',
+            top10players: result
+        });
+
+    });
+    
 });
 
 module.exports = router;

@@ -1,7 +1,9 @@
 extends layout
 
 block content
-
+    ul
+        each player in top10players
+            li= player.likes
     script(type='text/javascript').
-        console.log("#{req.user}");
+     
 

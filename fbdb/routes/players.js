@@ -4,9 +4,9 @@ var db = require('../lib/db');
 
 router.get('/:id/', function(req, res, next){
     var sql = `
-    SELECT firstName as p_fname, lastName as p_lname 
-    FROM fbdb.player 
-    WHERE idPlayer = ?;
+        SELECT firstName as p_fname, lastName as p_lname 
+        FROM fbdb.player 
+        WHERE idPlayer = ?;
     `;
 
     db.query(sql, [req.params.id], function(error, result){
@@ -15,10 +15,43 @@ router.get('/:id/', function(req, res, next){
                 error: "Failed to get players."
             });
         }
-        
-        res.render('player', {
-            title: "Player - " + result[0].p_fname + " " + result[0].p_lname,
-        });
+
+        // User logged in
+        if (req.user) {
+            var sql2 = `
+                SELECT *
+                FROM fbdb.user_player
+                WHERE player = ? AND user = ?;
+            `;
+            console.log(req.user);
+            db.query(sql2, [req.params.id, req.user.idUser], function(error2, result2) {
+                if (error2) {
+                    console.log(error2);
+                    res.status(404).json({
+                        error: "Error"
+                    });
+                }
+                console.log(result2.length);
+                if (result2 && result2.length > 0) {
+                    console.log("First checkpoint!!!");
+                    res.render('player', {
+                        isLiked: true,
+                        title: "Player - " + result[0].p_fname + " " + result[0].p_lname,
+                    });
+                } else {
+                    res.render('player', {
+                        isLiked: false,
+                        title: "Player - " + result[0].p_fname + " " + result[0].p_lname,
+                    });              
+                }              
+            }) 
+        } else {
+            console.log("Second checkpoint!!!");
+            res.render('player', {
+                title: "Player - " + result[0].p_fname + " " + result[0].p_lname,
+                isLiked: false
+            });
+        }     
     });
 });
 
@@ -75,6 +108,87 @@ router.get('/:id/contracts', function(req, res, next){
         }
         
         res.status(200).json(result);
+    });
+});
+
+router.get('/:id/likes', function(req, res, next){
+    var sql = `
+        SELECT COUNT(*) as likes
+        FROM fbdb.user_player as UP
+        WHERE UP.player = ?
+        GROUP BY player
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get contracts."
+            });
+        }
+
+        if (result.length > 0) {
+            res.status(200).json(result[0]);
+        } else {
+            res.status(200).json({likes: 0});
+        }
+        
+    });
+});
+
+router.post('/:id/likes', function(req, res, next){
+    // Check if user already liked the player
+    var sql1 = `
+        SELECT *
+        FROM fbdb.user_player
+        WHERE player = ? AND user = ?;
+    `;
+
+    db.query(sql1, [req.params.id, req.user.idUser], function(error, result){
+        // First query failed
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get likes."
+            });
+        }
+
+        // If not liked, then like
+        if (!result || result.length == 0) {
+            console.log("Didnt like before");
+            var sql2 = `
+                INSERT INTO fbdb.user_player(user, player)
+                VALUES(?, ?);
+            `;
+            console.log(req.user.idUser);
+            db.query(sql2, [req.user.idUser, req.params.id], function(error, result){
+                if (error) {
+                    console.log(error);
+                    res.status(404).json({
+                        error: "Failed to submit likes."
+                    });
+                }
+                console.log("Like successs");
+                res.status(200).json({like: true});
+            });
+        }
+        // If liked, remove like
+        else {
+            console.log("Liked before");
+            var sql2 = `
+                DELETE FROM fbdb.user_player
+                WHERE player = ? AND user = ?;
+            `;
+            db.query(sql2, [req.params.id, req.user.idUser], function(error, result){
+                if (error) {
+                    console.log(error);
+                    res.status(404).json({
+                        error: "Failed to delete likes."
+                    });
+                }
+                console.log("Unlike success");
+                res.status(200).json({like: false});
+            });
+        }
+        
     });
 });
 
