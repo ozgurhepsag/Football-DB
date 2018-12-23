@@ -1,9 +1,19 @@
 extends layout
 
 block content
-    ul
-        each player in top10players
-            li= player.likes
+    div.container
+        div.row
+            div.col-sm-6
+                h3 Most Popular Players - Top 10   
+                div.card-deck     
+                    each player, index in top10players
+                            div.mb-2.card(style="width: 18rem;")
+                                img.card-img-top(src=player.image)
+                                div.card-body
+                                    h5.card-title ##{index+1}
+                                    p.card-text #{player.name}
+                                    a.btn.btn-sm.btn-primary(href='/players/'+player.id) Profile
+    
     script(type='text/javascript').
      
 

@@ -192,5 +192,45 @@ router.post('/:id/likes', function(req, res, next){
     });
 });
 
+router.get('/:id/comments', function(req, res, next){
+    var sql = `
+        SELECT C.comment, C.date, U.idUser, U.email, U.name
+        FROM fbdb.user_player_comment as C, fbdb.user as U
+        WHERE player = ? AND idUser = user
+        ORDER BY date;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: 'Error while reading comments.'
+            });
+        }
+
+        res.status(201).json({
+            comments: result
+        });
+    })
+});
+
+router.post('/:id/comments', function(req, res, next){
+    var sql = `
+        INSERT INTO fbdb.user_player_comment(user, player, comment, date)
+        VALUES(?, ?, ?, ?);
+    `;
+
+    db.query(sql, [req.user.idUser, req.params.id, req.body.comment, new Date()], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: 'Error while saving comment.'
+            });
+        }
+
+        res.status(201).json({
+            success: 'Comment saved successfully!'
+        });
+    });
+});
+
 
 module.exports = router;

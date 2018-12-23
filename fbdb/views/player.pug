@@ -10,11 +10,9 @@ block content
                 .col-md-8.px-3
                     .card-block.px-3#cardArea
 
-    .container  
         .mb-5.mt-5
         h2 Statistics
 
-    .container
         .mb-5.mt-5
             table#statistics.table.table-hover
                 thead
@@ -27,11 +25,9 @@ block content
                             img#trophiesImage(src='/images/assisticon.png' width='40' height='40' data-toggle='tooltip' title='Assists')
                 tbody#statisticsBody
     
-    .container
         .mb-5.mt-5
         h2 Contracts
 
-    .container
         .mb-5.mt-5
             table#contracts.table.table-hover
                 thead
@@ -42,12 +38,26 @@ block content
                         th Value
                 tbody#contractsBody
 
+        .row
+            h3 Comments
+        .row#commentsDiv
+            p No comments
+        .form-group.row.mt-3
+            label.col-sm-2.col-form-label(for="inComment") New comment: 
+            .col-sm-5
+                input#inComment.form-control(type="text" placeholder="Comment body")
+            .col-sm-5
+                 button#btnComment.btn.btn-success(onclick="sendComment()") Send
+                 
+
+
     script(type='text/javascript').
             $(document).ready(function(){
                 fillPlayerProfileCard();   
                 populateStatiticsTable();  
                 populateContractsTable();
                 getPlayerLikes();
+                getPlayerComments();
             });
 
                 // Get profile
@@ -216,4 +226,61 @@ block content
                     $("#likeButton").addClass('btn-primary');
                     $("#likeMessage").text("Like");
                 }
+            }
+
+            function sendComment() {
+                if(!isLoggedIn()) {
+                    toastr.warning('You need to be logged in for this action.');
+                } else {
+                    var message = $("#inComment").val();
+                    if (message.length > 140) {
+                        toastr.error('Your comment cannot be more than 140 characters...');
+                        return;
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        url: window.location.pathname + '/comments/',
+                        data: {comment: message},
+                        success: function(data){
+                            toastr.success('Your comment is sent!');
+                            getPlayerComments();
+                        },
+                        error: function(data){
+                            toastr.error('Error while submitting comment...');
+                        }
+                    });
+                }
+            }
+
+            function getPlayerComments() {
+                $.ajax({
+                    type: 'GET',
+                    url: window.location.pathname + '/comments/',
+                    success: function(data){
+                        if (data.comments.length > 0) {
+                            $("#commentsDiv").empty();
+                        }
+                        for(var i=0; i<data.comments.length; i++) {
+                            var newCommentHtml = `
+                                <div class="col-sm-4">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <i><strong>${data.comments[i].name}</strong></i>
+                                            on ${data.comments[i].date.substring(0, 10)}
+                                        </div>
+                                        <div class="panel-body">
+                                            ${data.comments[i].comment}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            $("#commentsDiv").append(newCommentHtml);
+
+                        }
+                    },
+                    error: function(data){
+                        toastr.error('Error while getting comments...');
+                    }
+                });
             }
