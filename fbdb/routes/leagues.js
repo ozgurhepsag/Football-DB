@@ -48,6 +48,24 @@ router.get('/:id/teams/league_name', function(req, res, next){
 
 /*GET teams of the desired league*/
 router.get('/:id/teams/list', function(req, res, next){
+    var sql = `
+    select team_name as s_tname, team_id as s_tid, played as s_played, won as s_won, drawn as s_drawn, lost as s_lost, f as s_for, a as s_against, gd as s_gd, points as s_points, league as s_lid 
+    from fbdb.view_standings 
+    where league = ?;
+    `;
+
+    db.query(sql, [req.params.id], function(error, result){
+        if (error) {
+            res.status(404).json({
+                error: "Failed to get league name."
+            });
+        }
+        res.status(200).json(result);
+    });
+});
+
+/*GET teams of the desired league
+router.get('/:id/teams/list', function(req, res, next){
 
     var sqlTeam = `
     SELECT idTeam as t_id, name as t_name
@@ -126,7 +144,7 @@ router.get('/:id/teams/list', function(req, res, next){
 
     });   
     
-});
+});*/
 
 /* GET leagues list. */
 router.get('/list', function(req, res, next){ // league logosu eklenebilir
