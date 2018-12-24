@@ -4,7 +4,7 @@ var db = require('../lib/db');
 
 router.get('/logs', function(req, res, next){
     var sql = `
-        SELECT * FROM fbdb.log ORDER BY idLog;
+        SELECT * FROM fbdb.log ORDER BY idLog DESC;
     `;
 
     db.query(sql, function(error, result){

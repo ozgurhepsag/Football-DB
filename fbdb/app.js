@@ -178,7 +178,7 @@ app.use(function(req, res, next) {
 
 /* ROUTES */
 app.use('/', indexRouter);
-app.use('/admin', adminRouter);
+app.use('/admin', isAdmin, adminRouter);
 app.use('/users', usersRouter);
 app.use('/about', aboutRouter);
 app.use('/teams', teamsRouter);
