@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    .container
+        .card-deck
+            each player, index in players
+                .card
+                    - var bDate = player.birthDate.toDateString();
+                    img.card-img-top(src=player.image, alt=player.fname)
+                    .card-body
+                        h5.card-title #{player.firstName + " " + player.lastName} 
+                        p.card-text
+                            | He was born in #{bDate}. Plays in #{player.position} role.
+                        p.card-text
+                            a(href='/players/'+player.idPlayer)
+                                small.text-muted Visit profile

@@ -221,6 +221,7 @@ router.post('/:id/comments', function(req, res, next){
 
     db.query(sql, [req.user.idUser, req.params.id, req.body.comment, new Date()], function(error, result){
         if (error) {
+            console.log("Error: " + error);
             res.status(404).json({
                 error: 'Error while saving comment.'
             });

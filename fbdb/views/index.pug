@@ -2,18 +2,55 @@ extends layout
 
 block content
     div.container
-        div.row
-            div.col-sm-6
-                h3 Most Popular Players - Top 10   
-                div.card-deck     
-                    each player, index in top10players
-                            div.mb-2.card(style="width: 18rem;")
-                                img.card-img-top(src=player.image)
-                                div.card-body
-                                    h5.card-title ##{index+1}
-                                    p.card-text #{player.name}
-                                    a.btn.btn-sm.btn-primary(href='/players/'+player.id) Profile
+        .row
+            h1.display-4 Football Database
+        .row
+            .col.col-lg-8
+                p.lead Welcome to FBDB! If you are a big football lover, you are the right place.
+                p.lead If you are already a member
+                    a.btn.btn-sm.btn-success.mr-2.ml-2 Login
+                    | now! Don't worry if you are not.
+                    a.btn.btn-sm.btn-warning.mr-2.ml-2 Register 
+                    | to become a member in only few seconds. 
+                p.lead See below what you can find on Football Database! Or get in to action by using navigation bar. Find your favourite players and make sure they are amongst the top players.
+                .card-group
+                    .card
+                        img.card-img-top(src='/images/assisticon.png', alt='...', height = 200)
+                        .card-body
+                        h5.card-title Players
+                        p.card-text
+                            | You can like and display personal informations of football players.
+                        .card-footer
+                        small.text-muted Last updated 3 mins ago
+                    .card
+                        img.card-img-top(src='/images/goalicon.png', alt='...', height = 200)
+                        .card-body
+                        h5.card-title Statistics
+                        p.card-text You can see how players played through years.
+                        .card-footer
+                        small.text-muted Last updated 3 mins ago
+                    .card
+                        img.card-img-top(src='/images/trophiesicon.jpg', alt='...', height = 200)
+                        .card-body
+                        h5.card-title Trophies
+                        p.card-text
+                            | You can display what trophies teams managed to win.
+                        .card-footer
+                        small.text-muted Last updated 3 mins ago
+
+            .col.col-lg-3.offset-lg-1
+                .card.bg-light.mb-3(style='max-width: 18rem;')
+                    .card-header Top 10 Players
+                    .card-body  
+
+                        each player, index in top10players
+                            .media
+                                img.mr-3(src=player.image style="height:48px;")
+                                div.media-body
+                                    h5.mt-0 ##{index+1}
+                                    a(href='/players/'+player.id)
+                                        p #{player.name}
     
     script(type='text/javascript').
-     
+
 

@@ -2,23 +2,25 @@ extends layout
 
 block content
     .container.mt-5
-        form(action='/register' method='POST')
-            h2 Register
-            .form-group
-                label(for='email') Email address
-                input#email.form-control(type='email' name='email' aria-describedby='emailHelp' placeholder='Enter email' required)
-                small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
-            .form-group
-                label(for='name') First name
-                input#name.form-control(type='text' name='name' placeholder='Your first name' required)        
-            .form-group
-                label(for='password1') Password
-                input#password1.form-control(type='password' name='password1' placeholder='Password' required)
-            .form-group
-                label(for='password2') Repeat password
-                input#password2.form-control(type='password' name='password2' placeholder='Password' required)
-            .text-center
-                button.btn.btn-primary(type='submit') Register
+        .row
+            .col-lg-6.offset-lg-3
+                form(action='/register' method='POST')
+                    h2 Register
+                    .form-group
+                        label(for='email') Email address
+                        input#email.form-control(type='email' name='email' aria-describedby='emailHelp' placeholder='Enter email' required)
+                        small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
+                    .form-group
+                        label(for='name') First name
+                        input#name.form-control(type='text' name='name' placeholder='Your first name' required)        
+                    .form-group
+                        label(for='password1') Password
+                        input#password1.form-control(type='password' name='password1' placeholder='Password' required)
+                    .form-group
+                        label(for='password2') Repeat password
+                        input#password2.form-control(type='password' name='password2' placeholder='Password' required)
+                    .text-center
+                        button.btn.btn-primary(type='submit') Register
 
     script(type='text/javascript').
         $(document).ready(function(){

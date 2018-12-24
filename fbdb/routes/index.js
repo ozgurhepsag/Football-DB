@@ -24,4 +24,37 @@ router.get('/', function(req, res, next) {
     
 });
 
+router.get('/players', function(req, res, next){
+    var sql = `
+        SELECT *
+        FROM fbdb.player;
+    `;
+
+    db.query(sql, function(error, result) {
+        if (error) {
+            res.status(404).send('Not found');
+        }
+        res.render('players', { 
+            title: 'FBDB - Players',
+            players: result
+        });
+    });
+});
+
+router.get('/teams', function(req, res, next){
+    var sql = `
+        SELECT *
+        FROM fbdb.team;
+    `;
+
+    db.query(sql, function(error, result) {
+        if (error) {
+            res.status(404).send('Not found');
+        }
+        res.render('teams', { 
+            title: 'FBDB - Teams',
+            teams: result
+        });
+    });
+})
 module.exports = router;

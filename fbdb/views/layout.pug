@@ -32,9 +32,9 @@ html
             a.nav-link(href='/')
               | Home
           li.nav-item
-            a.nav-link(href='/') Players
+            a.nav-link(href='/players') Players
           li.nav-item
-            a.nav-link(href='/') Teams
+            a.nav-link(href='/teams') Teams
             li.nav-item
             a.nav-link(href='/leagues') Leagues
           if req.user && req.user.role == 1
@@ -68,3 +68,4 @@ html
 
           
     block content
+    .mt-5

@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    .container
+        .card-deck
+            each team, index in teams
+                .card
+                    img.card-img-top(src=team.logo)
+                    .card-body
+                        h5.card-title #{team.name} 
+                        p.card-text Founded in #{team.foundationYear}.
+                        p.card-text
+                            a(href='/teams/'+team.idTeam)
+                                small.text-muted Visit page
