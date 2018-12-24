@@ -41,7 +41,6 @@ router.get('/player_statistics/:id', function(req, res, next){
                 error: "Failed to get statistic."
             });
         }
-        
         res.status(200).json(result[0]);
     });
 });
@@ -59,7 +58,7 @@ router.post('/player_statistics', function(req, res, next){
                 error: 'Failed to add row.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(201).json({
             success: 'Row added successfully!'
         });   
@@ -79,7 +78,7 @@ router.delete('/player_statistics/:id', function(req, res, next){
                 error: 'Failed to delete row.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Row deleted successfully!'
         });
@@ -101,10 +100,31 @@ router.put('/player_statistics/:id', function(req, res, next){
                 error: 'Failed to update player.'
             });
         } 
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Player updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'player_statistic',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

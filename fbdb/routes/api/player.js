@@ -54,7 +54,7 @@ router.post('/players', function(req, res, next){
                 error: 'Failed to add player.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(201).json({
             success: 'Player added successfully!'
         });   
@@ -74,7 +74,7 @@ router.delete('/players/:id', function(req, res, next){
                 error: 'Failed to delete player.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Player deleted successfully!'
         });
@@ -95,11 +95,32 @@ router.put('/players/:id', function(req, res, next){
             res.status(404).json({
                 error: 'Failed to update player.'
             });
-        } 
+        }
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Player updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'player',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

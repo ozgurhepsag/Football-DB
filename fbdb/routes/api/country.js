@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../../lib/db')
+var db = require('../../lib/db');
 
 /* GET all countries */
 router.get('/countries', function(req, res, next){
@@ -54,7 +54,8 @@ router.post('/countries', function(req, res, next){
                 error: 'Failed to add country.',
             });
         } 
-
+        
+        createLog(req, 'CREATE');
         res.status(200).json({
             success: 'Country added successfully!'
         });   
@@ -67,6 +68,7 @@ router.delete('/countries/:id', function(req, res, next){
         DELETE FROM fbdb.country
         WHERE idCountry = ?;
     `;
+
     db.query(sql, [req.params.id], function(error, result){
         if(error){
             res.status(404).json({
@@ -74,6 +76,7 @@ router.delete('/countries/:id', function(req, res, next){
             });
         }
         
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Country deleted successfully!'
         });
@@ -94,10 +97,32 @@ router.put('/countries/:id', function(req, res, next){
                 error: 'Failed to add country.'
             });
         } 
+
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Country updated successfully!'
         });     
     });    
 });
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'country',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

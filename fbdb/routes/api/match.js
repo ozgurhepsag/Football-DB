@@ -55,7 +55,7 @@ router.post('/matches', function(req, res, next){
                 error: 'Failed to add match.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(200).json({
             success: 'Match added successfully!'
         });   
@@ -75,7 +75,7 @@ router.delete('/matches/:id', function(req, res, next){
                 error: 'Failed to delete match.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Match deleted successfully!'
         });
@@ -97,10 +97,31 @@ router.put('/matches/:id', function(req, res, next){
                 error: 'Failed to update match.'
             });
         } 
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Match updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'match',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

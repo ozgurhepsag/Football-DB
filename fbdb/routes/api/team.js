@@ -56,7 +56,7 @@ router.post('/teams', function(req, res, next){
                 error: 'Failed to add team.',
             });
         } 
-
+        createLog(req, "CREATE");
         res.status(200).json({
             success: 'Team added successfully!'
         });   
@@ -76,7 +76,7 @@ router.delete('/teams/:id', function(req, res, next){
                 error: 'Failed to delete team.',
             });
         }
-        
+        createLog(req, "DELETE");
         res.status(201).json({
             success: 'Team deleted successfully!'
         });
@@ -99,10 +99,31 @@ router.put('/teams/:id', function(req, res, next){
                 error: 'Failed to update team.'
             });
         } 
+        createLog(req, "UPDATE");
         res.status(201).json({
             success: 'Team updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'team',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

@@ -51,6 +51,7 @@ router.post('/leagues', function(req, res, next){
             });
         } 
 
+        createLog(req, 'CREATE');
         res.status(200).json({
             success: 'League added successfully!'
         });   
@@ -69,7 +70,8 @@ router.delete('/leagues/:id', function(req, res, next){
                 error: 'Failed to delete league.',
             });
         }
-        
+
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'League deleted successfully!'
         });
@@ -83,16 +85,39 @@ router.put('/leagues/:id', function(req, res, next){
         SET name = ?, country = ?
         WHERE idLeague = ?;
     `;
+
     db.query(sql, [req.body.l_name, req.body.c_id, req.body.l_id], function(error, result){
         if(error){    
             res.status(404).json({
                 error: 'Failed to add league.'
             });
         } 
+
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'League updated successfully!'
         });  
     })
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'league',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

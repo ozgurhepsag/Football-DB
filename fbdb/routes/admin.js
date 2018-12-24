@@ -1,5 +1,20 @@
 var express = require('express');
 var router = express.Router();
+var db = require('../lib/db');
+
+router.get('/logs', function(req, res, next){
+    var sql = `
+        SELECT * FROM fbdb.log ORDER BY idLog;
+    `;
+
+    db.query(sql, function(error, result){
+        if (error) {
+            res.status(404).send('Not found');
+        }
+
+        res.status(200).render('admin_logs', { title: 'FBDB - Logs', logs: result });
+    });
+});
 
 router.get('/country', function(req, res, next){
     res.render('admin_country', { title: 'FBDB - Manage Countries' });

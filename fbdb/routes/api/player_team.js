@@ -34,7 +34,7 @@ router.post('/player_team', function(req, res, next){
                 error: 'Failed to add row.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(201).json({
             success: 'Row added successfully!'
         });   
@@ -54,11 +54,31 @@ router.delete('/player_team/', function(req, res, next){
                 error: 'Failed to delete row.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Row deleted successfully!'
         });
     });
 });
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'player_team',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

@@ -56,7 +56,7 @@ router.post('/player_contracts', function(req, res, next){
                 error: 'Failed to add contract.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(201).json({
             success: 'Contract added successfully!'
         });   
@@ -76,7 +76,7 @@ router.delete('/player_contracts/:id', function(req, res, next){
                 error: 'Failed to delete contract.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Contract deleted successfully!'
         });
@@ -98,10 +98,31 @@ router.put('/player_contracts/:id', function(req, res, next){
                 error: 'Failed to update contract.'
             });
         } 
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Contract updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'player_contract',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

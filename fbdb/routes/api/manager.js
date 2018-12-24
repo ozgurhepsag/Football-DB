@@ -54,7 +54,7 @@ router.post('/managers', function(req, res, next){
                 error: 'Failed to add manager.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(201).json({
             success: 'Manager added successfully!'
         });   
@@ -74,7 +74,7 @@ router.delete('/managers/:id', function(req, res, next){
                 error: 'Failed to delete manager.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Manager deleted successfully!'
         });
@@ -96,10 +96,31 @@ router.put('/managers/:id', function(req, res, next){
                 error: 'Failed to update manager.'
             });
         } 
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Manager updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'manager',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;

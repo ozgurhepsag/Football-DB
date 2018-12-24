@@ -52,7 +52,7 @@ router.post('/trophies', function(req, res, next){
                 error: 'Failed to add trophy.',
             });
         } 
-
+        createLog(req, 'CREATE');
         res.status(200).json({
             success: 'Trophy added successfully!'
         });   
@@ -72,7 +72,7 @@ router.delete('/trophies/:id', function(req, res, next){
                 error: 'Failed to delete trophy.',
             });
         }
-        
+        createLog(req, 'DELETE');
         res.status(201).json({
             success: 'Trophy deleted successfully!'
         });
@@ -94,10 +94,31 @@ router.put('/trophies/:id', function(req, res, next){
                 error: 'Failed to update trophy.'
             });
         } 
+        createLog(req, 'UPDATE');
         res.status(201).json({
             success: 'Trophy updated successfully!'
         });  
     });
 })
+
+function createLog(req, operation) {
+    if (!req.user) return;
+
+    var log = {
+        user: req.user.idUser,
+        related_table: 'trophy',
+        operation: operation,
+        date: new Date()
+    }
+
+    var sql = `
+        INSERT INTO fbdb.log(user, related_table, operation, date)
+        VALUES (?, ?, ?, ?);
+    `
+
+    db.query(sql, [log.user, log.related_table, log.operation, log.date], function(error, result){
+        if (error) return;
+    });
+}
 
 module.exports = router;
