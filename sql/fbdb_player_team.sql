@@ -32,15 +32,6 @@ CREATE TABLE `player_team` (
   CONSTRAINT `fk_pt_team` FOREIGN KEY (`team`) REFERENCES `team` (`idteam`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `player_team`
---
-
-LOCK TABLES `player_team` WRITE;
-/*!40000 ALTER TABLE `player_team` DISABLE KEYS */;
-/*!40000 ALTER TABLE `player_team` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -51,4 +42,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-30 16:18:17
+-- Dump completed on 2018-12-24 23:30:49

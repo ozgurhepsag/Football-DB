@@ -25,23 +25,13 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `idUser` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(45) NOT NULL,
-  `password` char(32) NOT NULL,
+  `password` char(128) NOT NULL,
   `name` varchar(45) NOT NULL,
   `role` int(11) DEFAULT '2',
   PRIMARY KEY (`idUser`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users in the FBDB. Role 1 is admin, 2 is user.';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users in the FBDB. Role 1 is admin, 2 is user.';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'x@fbdb.com','e10adc3949ba59abbe56e057f20f883e','Name',2);
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -52,4 +42,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-30 16:18:18
+-- Dump completed on 2018-12-24 23:30:50

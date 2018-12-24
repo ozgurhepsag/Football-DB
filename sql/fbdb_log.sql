@@ -16,32 +16,23 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `user_team_comment`
+-- Table structure for table `log`
 --
 
-DROP TABLE IF EXISTS `user_team_comment`;
+DROP TABLE IF EXISTS `log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
-CREATE TABLE `user_team_comment` (
-  `user` int(11) NOT NULL,
-  `team` int(11) NOT NULL,
-  `comment` varchar(128) NOT NULL,
-  `date` date NOT NULL,
-  KEY `fk_utc_user` (`user`),
-  KEY `fk_utc_team` (`team`),
-  CONSTRAINT `fk_utc_team` FOREIGN KEY (`team`) REFERENCES `team` (`idteam`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_utc_user` FOREIGN KEY (`user`) REFERENCES `user` (`iduser`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `log` (
+  `idLog` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) DEFAULT NULL,
+  `related_table` varchar(45) DEFAULT NULL,
+  `operation` varchar(45) DEFAULT NULL,
+  `date` datetime DEFAULT NULL,
+  PRIMARY KEY (`idLog`),
+  KEY `fk_log_user` (`user`),
+  CONSTRAINT `fk_log_user` FOREIGN KEY (`user`) REFERENCES `user` (`iduser`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_team_comment`
---
-
-LOCK TABLES `user_team_comment` WRITE;
-/*!40000 ALTER TABLE `user_team_comment` DISABLE KEYS */;
-/*!40000 ALTER TABLE `user_team_comment` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -52,4 +43,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-11-30 16:18:16
+-- Dump completed on 2018-12-24 23:30:49
