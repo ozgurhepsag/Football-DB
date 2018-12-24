@@ -31,6 +31,16 @@ CREATE TABLE `user_player` (
   CONSTRAINT `fk_up_user` FOREIGN KEY (`user`) REFERENCES `user` (`iduser`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_player`
+--
+
+LOCK TABLES `user_player` WRITE;
+/*!40000 ALTER TABLE `user_player` DISABLE KEYS */;
+INSERT INTO `user_player` VALUES (8,8),(8,9),(8,10),(8,11),(8,12),(8,13),(8,15),(8,16),(8,17),(8,18),(8,19),(8,14);
+/*!40000 ALTER TABLE `user_player` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -41,4 +51,4 @@ CREATE TABLE `user_player` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-12-24 23:30:49
+-- Dump completed on 2018-12-24 22:05:13

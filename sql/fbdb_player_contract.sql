@@ -34,8 +34,18 @@ CREATE TABLE `player_contract` (
   KEY `fk_pcontract_team` (`team`),
   CONSTRAINT `fk_pcontract_player` FOREIGN KEY (`player`) REFERENCES `player` (`idplayer`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_pcontract_team` FOREIGN KEY (`team`) REFERENCES `team` (`idteam`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `player_contract`
+--
+
+LOCK TABLES `player_contract` WRITE;
+/*!40000 ALTER TABLE `player_contract` DISABLE KEYS */;
+INSERT INTO `player_contract` VALUES (4,'2016-12-04','2020-12-04',80000000.00,8,13);
+/*!40000 ALTER TABLE `player_contract` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -46,4 +56,4 @@ CREATE TABLE `player_contract` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-12-24 23:30:48
+-- Dump completed on 2018-12-24 22:05:11
